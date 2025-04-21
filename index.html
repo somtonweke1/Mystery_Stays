@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystery Stays - Find Hidden Discounts</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .search-container {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .results-container {
+            margin-top: 30px;
+        }
+        .loading {
+            text-align: center;
+            display: none;
+        }
+        .loading img {
+            width: 50px;
+        }
+        .listing-card {
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .listing-info {
+            flex: 1;
+        }
+        .listing-pricing {
+            text-align: right;
+            min-width: 150px;
+        }
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+        }
+        .discount-price {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 1.2em;
+        }
+        .discount-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mystery Stays</h1>
+        <p>Find hidden discounts on Airbnb listings with last-minute availability</p>
+    </header>
+
+    <div class="search-container">
+        <form id="search-form">
+            <div class="form-group">
+                <label for="city">Destination</label>
+                <input type="text" id="city" placeholder="Enter city name" value="Lisbon" required>
+            </div>
+            <div class="form-group">
+                <label for="check-in">Check-in Date</label>
+                <input type="date" id="check-in" required>
+            </div>
+            <div class="form-group">
+                <label for="check-out">Check-out Date</label>
+                <input type="date" id="check-out" required>
+            </div>
+            <button type="submit" id="search-button">Find Mystery Deals</button>
+        </form>
+    </div>
+
+    <div class="loading">
+        <p>Scanning for the best hidden deals...</p>
+        <img src="https://i.gifer.com/ZKZg.gif" alt="Loading">
+    </div>
+
+    <div class="no-results">
+        <h3>No discounted listings found</h3>
+        <p>Try different dates or another destination</p>
+    </div>
+
+    <div class="results-container" id="results"></div>
+
+    <script>
+        // Set default dates (today and 5 days from now)
+        const today = new Date();
+        const fiveDaysLater = new Date(today);
+        fiveDaysLater.setDate(today.getDate() + 5);
+        
+        document.getElementById('check-in').valueAsDate = today;
+        document.getElementById('check-out').valueAsDate = fiveDaysLater;
+
+        document.getElementById('search-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const city = document.getElementById('city').value;
+            const checkIn = document.getElementById('check-in').value;
+            const checkOut = document.getElementById('check-out').value;
+            
+            // Show loading
+            document.querySelector('.loading').style.display = 'block';
+            document.querySelector('.no-results').style.display = 'none';
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                const response = await fetch('http://127.0.0.1:5001/scan_airbnb', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        city: city,
+                        check_in: checkIn,
+                        check_out: checkOut
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Hide loading
+                document.querySelector('.loading').style.display = 'none';
+                
+                if (data.status === 'success' && data.listings && data.listings.length > 0) {
+                    displayResults(data.listings);
+                } else {
+                    document.querySelector('.no-results').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.querySelector('.loading').style.display = 'none';
+                document.querySelector('.no-results').style.display = 'block';
+                document.querySelector('.no-results h3').textContent = 'Error scanning listings';
+                document.querySelector('.no-results p').textContent = 'Please try again later';
+            }
+        });
+
+        function displayResults(listings) {
+            const resultsContainer = document.getElementById('results');
+            
+            listings.forEach(listing => {
+                const discountPercentage = Math.round(((listing.original_price - listing.discount_price) / listing.original_price) * 100);
+                
+                const listingCard = document.createElement('div');
+                listingCard.className = 'listing-card';
+                
+                listingCard.innerHTML = `
+                    <div class="listing-info">
+                        <h3>${listing.title}</h3>
+                        <p>${listing.city}</p>
+                    </div>
+                    <div class="listing-pricing">
+                        <p class="original-price">$${listing.original_price}</p>
+                        <p class="discount-price">$${listing.discount_price} <span class="discount-badge">${discountPercentage}% OFF</span></p>
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(listingCard);
+            });
+        }
+    </script>
+</body>
+</html>
