@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+airbnb_debug.png
+chromedriver
+node_modules/
+.DS_Store
