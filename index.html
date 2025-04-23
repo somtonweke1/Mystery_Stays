@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mystery Stays - Find Hidden Discounts</title>
+    <title>Housing Navigator - Find Voucher-Friendly Apartments</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -44,6 +44,21 @@
             border-radius: 4px;
             font-size: 16px;
         }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        .checkbox-item input {
+            width: auto;
+            margin-right: 5px;
+        }
         button {
             background: #3498db;
             color: white;
@@ -67,7 +82,7 @@
         .loading img {
             width: 50px;
         }
-        .listing-card {
+        .property-card {
             border: 1px solid #eee;
             padding: 15px;
             margin-bottom: 15px;
@@ -75,29 +90,35 @@
             display: flex;
             justify-content: space-between;
         }
-        .listing-info {
+        .property-info {
             flex: 1;
         }
-        .listing-pricing {
+        .property-details {
             text-align: right;
             min-width: 150px;
         }
-        .original-price {
-            text-decoration: line-through;
-            color: #999;
-        }
-        .discount-price {
-            font-weight: bold;
-            color: #e74c3c;
-            font-size: 1.2em;
-        }
-        .discount-badge {
-            background: #e74c3c;
+        .voucher-badge {
+            background: #27ae60;
             color: white;
             padding: 3px 8px;
             border-radius: 4px;
             font-size: 0.8em;
-            margin-left: 5px;
+            margin-right: 5px;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        .subway-line {
+            background: #3498db;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-right: 5px;
+            font-size: 0.8em;
         }
         .no-results {
             text-align: center;
@@ -110,55 +131,93 @@
 </head>
 <body>
     <header>
-        <h1>Mystery Stays</h1>
-        <p>Find hidden discounts on Airbnb listings with last-minute availability</p>
+        <h1>Housing Navigator Assistant</h1>
+        <p>Find apartments in NYC that accept housing vouchers</p>
     </header>
 
     <div class="search-container">
         <form id="search-form">
             <div class="form-group">
-                <label for="city">Destination</label>
-                <input type="text" id="city" placeholder="Enter city name" value="Lisbon" required>
+                <label for="neighborhood">Neighborhood</label>
+                <select id="neighborhood">
+                    <option value="All NYC">All NYC</option>
+                    <option value="Astoria">Astoria</option>
+                    <option value="Bedford-Stuyvesant">Bedford-Stuyvesant</option>
+                    <option value="Bushwick">Bushwick</option>
+                    <option value="Crown Heights">Crown Heights</option>
+                    <option value="East Harlem">East Harlem</option>
+                    <option value="Flatbush">Flatbush</option>
+                    <option value="Washington Heights">Washington Heights</option>
+                    <option value="South Bronx">South Bronx</option>
+                </select>
             </div>
             <div class="form-group">
-                <label for="check-in">Check-in Date</label>
-                <input type="date" id="check-in" required>
+                <label for="bedrooms">Bedrooms</label>
+                <select id="bedrooms">
+                    <option value="Any">Any</option>
+                    <option value="1">1 Bedroom</option>
+                    <option value="2">2 Bedrooms</option>
+                    <option value="3">3+ Bedrooms</option>
+                </select>
             </div>
             <div class="form-group">
-                <label for="check-out">Check-out Date</label>
-                <input type="date" id="check-out" required>
+                <label for="max-rent">Maximum Monthly Rent</label>
+                <input type="range" id="max-rent" min="1000" max="3000" step="100" value="2000">
+                <div id="max-rent-display">$2,000</div>
             </div>
-            <button type="submit" id="search-button">Find Mystery Deals</button>
+            <div class="form-group">
+                <label>Voucher Types</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="section8" name="voucher_types" value="Section 8" checked>
+                        <label for="section8">Section 8</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cityfheps" name="voucher_types" value="CityFHEPS" checked>
+                        <label for="cityfheps">CityFHEPS</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="fheps" name="voucher_types" value="FHEPS">
+                        <label for="fheps">FHEPS</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="hasa" name="voucher_types" value="HASA">
+                        <label for="hasa">HASA</label>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" id="search-button">Find Housing</button>
         </form>
     </div>
 
     <div class="loading">
-        <p>Scanning for the best hidden deals...</p>
-        <img src="https://i.gifer.com/ZKZg.gif" alt="Loading">
+        <p>Scanning for voucher-friendly housing...</p>
+        <img src="/api/placeholder/50/50" alt="Loading">
     </div>
 
     <div class="no-results">
-        <h3>No discounted listings found</h3>
-        <p>Try different dates or another destination</p>
+        <h3>No voucher-friendly apartments found</h3>
+        <p>Try different filters or another neighborhood</p>
     </div>
 
     <div class="results-container" id="results"></div>
 
     <script>
-        // Set default dates (today and 5 days from now)
-        const today = new Date();
-        const fiveDaysLater = new Date(today);
-        fiveDaysLater.setDate(today.getDate() + 5);
-        
-        document.getElementById('check-in').valueAsDate = today;
-        document.getElementById('check-out').valueAsDate = fiveDaysLater;
+        // Update the displayed max rent value when slider changes
+        document.getElementById('max-rent').addEventListener('input', function() {
+            document.getElementById('max-rent-display').textContent = '$' + this.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        });
 
         document.getElementById('search-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const city = document.getElementById('city').value;
-            const checkIn = document.getElementById('check-in').value;
-            const checkOut = document.getElementById('check-out').value;
+            const neighborhood = document.getElementById('neighborhood').value;
+            const bedrooms = document.getElementById('bedrooms').value;
+            const maxRent = parseInt(document.getElementById('max-rent').value);
+            
+            // Get selected voucher types
+            const voucherCheckboxes = document.querySelectorAll('input[name="voucher_types"]:checked');
+            const voucherTypes = Array.from(voucherCheckboxes).map(checkbox => checkbox.value);
             
             // Show loading
             document.querySelector('.loading').style.display = 'block';
@@ -166,15 +225,16 @@
             document.getElementById('results').innerHTML = '';
             
             try {
-                const response = await fetch('http://127.0.0.1:5001/scan_airbnb', {
+                const response = await fetch('http://127.0.0.1:5000/scan_housing', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        city: city,
-                        check_in: checkIn,
-                        check_out: checkOut
+                        neighborhood: neighborhood,
+                        max_rent: maxRent,
+                        bedrooms: bedrooms,
+                        voucher_types: voucherTypes
                     })
                 });
                 
@@ -183,8 +243,8 @@
                 // Hide loading
                 document.querySelector('.loading').style.display = 'none';
                 
-                if (data.status === 'success' && data.listings && data.listings.length > 0) {
-                    displayResults(data.listings);
+                if (data.status === 'success' && data.properties && data.properties.length > 0) {
+                    displayResults(data.properties);
                 } else {
                     document.querySelector('.no-results').style.display = 'block';
                 }
@@ -197,28 +257,49 @@
             }
         });
 
-        function displayResults(listings) {
+        function displayResults(properties) {
             const resultsContainer = document.getElementById('results');
             
-            listings.forEach(listing => {
-                const discountPercentage = Math.round(((listing.original_price - listing.discount_price) / listing.original_price) * 100);
+            properties.forEach(property => {
+                const propertyCard = document.createElement('div');
+                propertyCard.className = 'property-card';
                 
-                const listingCard = document.createElement('div');
-                listingCard.className = 'listing-card';
+                // Generate voucher badges HTML
+                const voucherBadges = property.accepted_vouchers.map(voucher => 
+                    `<span class="voucher-badge">${voucher}</span>`
+                ).join('');
                 
-                listingCard.innerHTML = `
-                    <div class="listing-info">
-                        <h3>${listing.title}</h3>
-                        <p>${listing.city}</p>
+                // Generate subway line icons
+                const subwayLines = property.subway_lines.map(line => 
+                    `<span class="subway-line">${line}</span>`
+                ).join('');
+                
+                propertyCard.innerHTML = `
+                    <div class="property-info">
+                        <h3>${property.title}</h3>
+                        <p>${property.address}</p>
+                        <p>${property.bedrooms} BR | ${property.bathrooms} Bath | Available: ${formatDate(property.date_available)}</p>
+                        <div>
+                            ${voucherBadges}
+                        </div>
+                        <div>
+                            ${subwayLines}
+                        </div>
                     </div>
-                    <div class="listing-pricing">
-                        <p class="original-price">$${listing.original_price}</p>
-                        <p class="discount-price">$${listing.discount_price} <span class="discount-badge">${discountPercentage}% OFF</span></p>
+                    <div class="property-details">
+                        <p><strong>$${property.rent}/month</strong></p>
+                        <p>Landlord: ${property.landlord}</p>
+                        <p>Source: ${property.listing_source}</p>
                     </div>
                 `;
                 
-                resultsContainer.appendChild(listingCard);
+                resultsContainer.appendChild(propertyCard);
             });
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
     </script>
 </body>

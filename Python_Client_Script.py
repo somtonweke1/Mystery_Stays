@@ -1,41 +1,49 @@
 import requests
 
-BASE = "http://127.0.0.1:5001"  # Removed the square brackets
+BASE = "http://127.0.0.1:5000"  # Base URL for the Housing Navigator API
 
-# Add a property
-resp = requests.post(f"{BASE}/properties/add", json={
-    "name": "Cozy Studio",
-    "original_price": 100,
-    "amenities": ["wifi", "kitchen"],
-    "bedrooms": 1,
-    "location": {"city": "Barcelona", "country": "Spain"}
+# Scan for housing options
+resp = requests.post(f"{BASE}/scan_housing", json={
+    "neighborhood": "Bedford-Stuyvesant",
+    "max_rent": 2000,
+    "bedrooms": "2",
+    "voucher_types": ["Section 8", "CityFHEPS"]
 })
-print("Add property:", resp.json())
+print("Scan housing results:", resp.json())
 
-# Register user preferences
-resp = requests.post(f"{BASE}/users/preferences", json={
-    "user_id": "user1",
-    "preferences": {
-        "amenities": ["wifi", "kitchen"],
-        "price_max": 80,
-        "bedrooms": 1
-    }
+# Get available voucher types
+resp = requests.get(f"{BASE}/voucher_types")
+print("Voucher types:", resp.json())
+
+# Calculate voucher amount
+resp = requests.post(f"{BASE}/voucher_calculator", json={
+    "household_size": 3,
+    "annual_income": 35000,
+    "voucher_type": "section8",
+    "unit_size": "2br"
 })
-print("Register preferences:", resp.json())
+print("Voucher calculation:", resp.json())
 
-# Get matches
-resp = requests.get(f"{BASE}/properties/match/user1")
-print("Matches:", resp.json())
+# Get voucher requirements
+resp = requests.get(f"{BASE}/voucher_requirements?type=section8")
+print("Voucher requirements:", resp.json())
 
-# Book a stay
-resp = requests.post(f"{BASE}/bookings/create", json={
-    "user_id": "user1",
-    "property_id": "prop_1",
-    "check_in": "2025-05-01",
-    "check_out": "2025-05-05"
+# Get landlords who accept vouchers
+resp = requests.get(f"{BASE}/landlords?neighborhood=Washington Heights&voucher_type=Section 8")
+print("Landlords:", resp.json())
+
+# Get detailed information about a specific landlord
+resp = requests.get(f"{BASE}/landlords/LL1001")
+print("Landlord details:", resp.json())
+
+# Add a new landlord
+resp = requests.post(f"{BASE}/landlords", json={
+    "name": "Sunshine Properties",
+    "contact_name": "Maria Rodriguez",
+    "phone": "718-555-4321",
+    "email": "mrodriguez@sunshine.com",
+    "vouchers_accepted": ["Section 8", "CityFHEPS"],
+    "neighborhoods": ["Astoria", "Long Island City"],
+    "notes": "New landlord interested in working with voucher holders"
 })
-print("Booking:", resp.json())
-
-# Reveal location
-resp = requests.get(f"{BASE}/bookings/reveal/book_1")
-print("Reveal location:", resp.json())
+print("Add landlord:", resp.json())
