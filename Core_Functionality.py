@@ -1,280 +1,641 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-import datetime
-from typing import List, Dict, Any
-import os
-import json
-import time
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, JSON, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import hashlib
+from datetime import datetime
+import logging
 
-# Create the Flask app
+# Initialize Flask app
 app = Flask(__name__)
-CORS(app)
 
-# Create directory for data storage if it doesn't exist
-os.makedirs('data', exist_ok=True)
+# Database setup
+Base = declarative_base()
+engine = create_engine('sqlite:///realestate.db')  # For production, use a more robust DB
+Session = sessionmaker(bind=engine)
 
-class MysteryStayAgent:
-    def __init__(self):
-        self.available_properties = []
-        self.user_preferences = {}
-        self.booked_stays = {}
-
-    def add_available_property(self, property_details: Dict[str, Any]) -> str:
-        """Add a vacant property to the pool at a 50% discount."""
-        property_id = f"prop_{len(self.available_properties) + 1}"
-        property_details = property_details.copy()
-        property_details["id"] = property_id
-        property_details["discount_price"] = property_details["original_price"] * 0.5
-        self.available_properties.append(property_details)
-        return property_id
-
-    def register_user_preferences(self, user_id: str, preferences: Dict[str, Any]) -> None:
-        """Register a digital nomad's preferences."""
-        self.user_preferences[user_id] = preferences
-
-    def match_user_to_properties(self, user_id: str) -> List[Dict[str, Any]]:
-        """Find properties matching user preferences, hiding exact location."""
-        if user_id not in self.user_preferences:
-            return []
-        preferences = self.user_preferences[user_id]
-        matched = []
-        for prop in self.available_properties:
-            matches = True
-            for key in preferences:
-                if key == "location":
-                    continue  # Hide location for mystery stays
-                if key == "price_max" and prop["discount_price"] > preferences[key]:
-                    matches = False
-                elif key == "amenities" and not all(a in prop.get("amenities", []) for a in preferences[key]):
-                    matches = False
-                elif key not in ["price_max", "amenities"] and preferences[key] != prop.get(key):
-                    matches = False
-            if matches:
-                # Hide exact location, show region
-                mystery_prop = prop.copy()
-                if "address" in mystery_prop:
-                    del mystery_prop["address"]
-                if "location" in mystery_prop:
-                    mystery_prop["region"] = self._get_region(mystery_prop["location"])
-                    del mystery_prop["location"]
-                matched.append(mystery_prop)
-        return matched
-
-    def book_mystery_stay(self, user_id: str, property_id: str, check_in: datetime.date, check_out: datetime.date) -> Dict[str, Any]:
-        """Book a mystery stay and return confirmation (location hidden)."""
-        property_details = next((p for p in self.available_properties if p["id"] == property_id), None)
-        if not property_details:
-            return {"status": "failed", "reason": "Property not found"}
-        booking_id = f"book_{len(self.booked_stays) + 1}"
-        nights = (check_out - check_in).days
-        booking = {
-            "booking_id": booking_id,
-            "user_id": user_id,
-            "property_id": property_id,
-            "check_in": check_in.isoformat(),
-            "check_out": check_out.isoformat(),
-            "total_price": property_details["discount_price"] * nights,
-            "status": "confirmed",
-            "property_details": property_details
-        }
-        self.booked_stays[booking_id] = booking
-        confirmation = booking.copy()
-        confirmation["property_details"] = self._get_limited_property_details(property_details)
-        return confirmation
-
-    def reveal_location(self, booking_id: str) -> Dict[str, Any]:
-        """Reveal the exact location of a booked mystery stay."""
-        booking = self.booked_stays.get(booking_id)
-        if not booking:
-            return {"status": "failed", "reason": "Booking not found"}
-        return booking["property_details"]
-
-    def _get_region(self, location: Dict[str, Any]) -> str:
-        """Extract region info from location."""
-        return f"{location.get('city', 'Unknown City')}, {location.get('country', 'Unknown Country')}"
-
-    def _get_limited_property_details(self, property_details: Dict[str, Any]) -> Dict[str, Any]:
-        """Hide location details, show only region."""
-        limited = property_details.copy()
-        for key in ["address", "location", "coordinates", "directions"]:
-            if key in limited:
-                del limited[key]
-        if "location" in property_details:
-            limited["region"] = self._get_region(property_details["location"])
-        return limited
-
-# Initialize the Mystery Stay Agent
-mystery_agent = MysteryStayAgent()
-
-# Sample data generator
-def generate_sample_properties():
-    """Generate sample properties for the mystery stay agent"""
-    property_types = ["Apartment", "Villa", "Cottage", "Penthouse", "Loft"]
-    cities = [
-        {"city": "Lisbon", "country": "Portugal"},
-        {"city": "Barcelona", "country": "Spain"},
-        {"city": "Bali", "country": "Indonesia"},
-        {"city": "Chiang Mai", "country": "Thailand"},
-        {"city": "Mexico City", "country": "Mexico"},
-        {"city": "Medellín", "country": "Colombia"},
-        {"city": "Porto", "country": "Portugal"},
-        {"city": "Berlin", "country": "Germany"}
-    ]
+# Models
+class UserProfile(Base):
+    __tablename__ = 'users'
     
-    amenities_options = [
-        ["WiFi", "Kitchen", "Workspace", "Air Conditioning"],
-        ["WiFi", "Kitchen", "Pool", "Workspace", "Gym"],
-        ["WiFi", "Workspace", "Beachfront", "Kitchen"],
-        ["WiFi", "Coworking Space", "Laundry", "Kitchen"],
-        ["WiFi", "Mountain View", "Kitchen", "Heating"]
-    ]
+    id = Column(String, primary_key=True)
+    email = Column(String, unique=True, nullable=False)
+    name = Column(String, nullable=False)
+    preferences = Column(JSON)  # Store preferences as JSON
+    search_history = Column(JSON)  # Store search history as JSON
+    saved_properties = Column(JSON)  # Store saved property IDs as JSON array
+    usage_count = Column(Integer, default=0)  # Track API usage
+    last_reset = Column(DateTime)  # Track when usage count was last reset
+    premium = Column(Boolean, default=False)  # Premium user flag
+
+class Property(Base):
+    __tablename__ = 'properties'
     
-    properties = []
-    for i in range(20):
-        city_idx = i % len(cities)
-        prop_type_idx = i % len(property_types)
-        amenities_idx = i % len(amenities_options)
-        
-        property_details = {
-            "name": f"{property_types[prop_type_idx]} in {cities[city_idx]['city']}",
-            "type": property_types[prop_type_idx],
-            "location": cities[city_idx],
-            "original_price": 1000 + (i * 100),
-            "bedrooms": (i % 3) + 1,
-            "bathrooms": (i % 2) + 1,
-            "max_guests": ((i % 3) + 1) * 2,
-            "amenities": amenities_options[amenities_idx],
-            "address": f"{100 + i} Example Street, {cities[city_idx]['city']}",
-            "coordinates": {"lat": 0, "lng": 0},  # Would be real coordinates in production
-            "rating": round(3.5 + (i % 5) * 0.3, 1),
-            "reviews_count": i * 5,
-            "image_url": f"https://example.com/property_{i}.jpg"
-        }
-        mystery_agent.add_available_property(property_details)
+    id = Column(String, primary_key=True)
+    title = Column(String, nullable=False)
+    address = Column(String, nullable=False)
+    neighborhood = Column(String)
+    coordinates = Column(JSON)  # Store [lat, lng] as JSON
+    bedrooms = Column(Integer)
+    bathrooms = Column(Float)
+    rent = Column(Integer)
+    deposit = Column(Integer)
+    accepted_vouchers = Column(JSON)  # Store voucher types as JSON array
+    features = Column(JSON)  # Store features as JSON array
+    description = Column(String)
+    landlord = Column(String)
+    image_url = Column(String)
+    listing_source = Column(String)
+    available_date = Column(DateTime)
+    active = Column(Boolean, default=True)
 
-# Generate sample properties on startup
-generate_sample_properties()
+# Create tables if they don't exist
+Base.metadata.create_all(engine)
 
-# Root route
-@app.route("/")
-def home():
-    return "Mystery Stay API is running!"
-
-@app.route('/properties', methods=['GET'])
-def get_properties():
-    """Get all properties (only showing region, not exact location)"""
-    properties = []
-    for prop in mystery_agent.available_properties:
-        limited_prop = mystery_agent._get_limited_property_details(prop)
-        properties.append(limited_prop)
-    
-    return jsonify({
-        "status": "success",
-        "count": len(properties),
-        "properties": properties
-    })
-
-@app.route('/users/<user_id>/preferences', methods=['POST'])
-def set_user_preferences(user_id):
-    """Register a user's stay preferences"""
+# User authentication and profile routes
+@app.route('/auth/register', methods=['POST'])
+def register_user():
     data = request.json
-    if not data:
-        return jsonify({"status": "error", "message": "No data provided"}), 400
     
-    mystery_agent.register_user_preferences(user_id, data)
-    
-    return jsonify({
-        "status": "success",
-        "message": f"Preferences for user {user_id} registered successfully"
-    })
-
-@app.route('/users/<user_id>/matches', methods=['GET'])
-def get_user_matches(user_id):
-    """Get properties matching user preferences"""
-    matched_properties = mystery_agent.match_user_to_properties(user_id)
-    
-    return jsonify({
-        "status": "success",
-        "count": len(matched_properties),
-        "properties": matched_properties
-    })
-
-@app.route('/bookings', methods=['POST'])
-def create_booking():
-    """Book a mystery stay"""
-    data = request.json
-    if not data:
-        return jsonify({"status": "error", "message": "No data provided"}), 400
-    
-    required_fields = ["user_id", "property_id", "check_in", "check_out"]
+    # Validate required fields
+    required_fields = ["email", "password", "name"]
     for field in required_fields:
         if field not in data:
             return jsonify({"status": "error", "message": f"Missing required field: {field}"}), 400
     
-    try:
-        check_in = datetime.date.fromisoformat(data["check_in"])
-        check_out = datetime.date.fromisoformat(data["check_out"])
-    except ValueError:
-        return jsonify({"status": "error", "message": "Invalid date format. Use YYYY-MM-DD"}), 400
+    # Check if user already exists
+    session = Session()
+    existing_user = session.query(UserProfile).filter_by(email=data['email']).first()
+    if existing_user:
+        session.close()
+        return jsonify({"status": "error", "message": "User already exists"}), 400
     
-    result = mystery_agent.book_mystery_stay(
-        data["user_id"],
-        data["property_id"],
-        check_in,
-        check_out
+    # Create user profile
+    user_id = hashlib.md5(data['email'].encode()).hexdigest()
+    new_user = UserProfile(
+        id=user_id,
+        email=data['email'],
+        name=data['name'],
+        preferences={},
+        search_history=[],
+        saved_properties=[],
+        usage_count=0,
+        last_reset=datetime.utcnow(),
+        premium=False
     )
     
-    if result["status"] == "failed":
-        return jsonify({"status": "error", "message": result["reason"]}), 400
+    # In a real app, we'd hash the password and implement proper auth
+    # For this demo, we're just storing the profile info
     
-    return jsonify({
-        "status": "success",
-        "booking": result
-    })
+    try:
+        session.add(new_user)
+        session.commit()
+        return jsonify({
+            "status": "success", 
+            "message": "User registered successfully",
+            "user_id": user_id
+        })
+    except Exception as e:
+        session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        session.close()
 
-@app.route('/bookings/<booking_id>/reveal', methods=['GET'])
-def reveal_location(booking_id):
-    """Reveal the exact location of a mystery stay after booking"""
-    result = mystery_agent.reveal_location(booking_id)
+@app.route('/user/preferences', methods=['POST'])
+def update_preferences():
+    data = request.json
+    user_id = data.get('user_id')
     
-    if "status" in result and result["status"] == "failed":
-        return jsonify({"status": "error", "message": result["reason"]}), 404
+    if not user_id:
+        return jsonify({"status": "error", "message": "User ID required"}), 400
     
-    return jsonify({
-        "status": "success",
-        "property_details": result
-    })
+    preferences = data.get('preferences', {})
+    
+    # Update user preferences in database
+    session = Session()
+    try:
+        user = session.query(UserProfile).filter_by(id=user_id).first()
+        if not user:
+            session.close()
+            return jsonify({"status": "error", "message": "User not found"}), 404
+            
+        # Merge new preferences with existing ones
+        current_prefs = user.preferences if user.preferences else {}
+        updated_prefs = {**current_prefs, **preferences}
+        user.preferences = updated_prefs
+        
+        session.commit()
+        return jsonify({
+            "status": "success", 
+            "message": "Preferences updated successfully",
+            "preferences": updated_prefs
+        })
+    except Exception as e:
+        session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        session.close()
 
-@app.route('/property_types', methods=['GET'])
-def get_property_types():
-    """Get list of property types"""
-    types = [
-        {"id": "apartment", "name": "Apartment"},
-        {"id": "villa", "name": "Villa"},
-        {"id": "cottage", "name": "Cottage"},
-        {"id": "penthouse", "name": "Penthouse"},
-        {"id": "loft", "name": "Loft"}
-    ]
+@app.route('/user/saved_properties', methods=['POST'])
+def save_property():
+    data = request.json
+    user_id = data.get('user_id')
+    property_id = data.get('property_id')
     
-    return jsonify({
-        "status": "success",
-        "property_types": types
-    })
-
-@app.route('/regions', methods=['GET'])
-def get_regions():
-    """Get list of available regions"""
-    regions = []
-    for prop in mystery_agent.available_properties:
-        if "location" in prop:
-            region = mystery_agent._get_region(prop["location"])
-            if region not in regions:
-                regions.append(region)
+    if not user_id or not property_id:
+        return jsonify({"status": "error", "message": "User ID and Property ID required"}), 400
     
-    return jsonify({
-        "status": "success",
-        "regions": regions
-    })
+    # Update saved properties
+    session = Session()
+    try:
+        user = session.query(UserProfile).filter_by(id=user_id).first()
+        if not user:
+            session.close()
+            return jsonify({"status": "error", "message": "User not found"}), 404
+            
+        # Add property to saved list if not already saved
+        saved = user.saved_properties if user.saved_properties else []
+        if property_id not in saved:
+            saved.append(property_id)
+            user.saved_properties = saved
+            
+        session.commit()
+        return jsonify({
+            "status": "success", 
+            "message": "Property saved successfully",
+            "saved_properties": saved
+        })
+    except Exception as e:
+        session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        session.close()
 
+@app.route('/user/saved_properties', methods=['GET'])
+def get_saved_properties():
+    user_id = request.args.get('user_id')
+    
+    if not user_id:
+        return jsonify({"status": "error", "message": "User ID required"}), 400
+    
+    # Get saved properties with details
+    session = Session()
+    try:
+        user = session.query(UserProfile).filter_by(id=user_id).first()
+        if not user:
+            session.close()
+            return jsonify({"status": "error", "message": "User not found"}), 404
+            
+        saved_ids = user.saved_properties if user.saved_properties else []
+        
+        # Fetch property details
+        saved_properties = []
+        if saved_ids:
+            properties = session.query(Property).filter(Property.id.in_(saved_ids)).all()
+            saved_properties = [
+                {
+                    "id": p.id,
+                    "title": p.title,
+                    "address": p.address,
+                    "neighborhood": p.neighborhood,
+                    "bedrooms": p.bedrooms,
+                    "rent": p.rent,
+                    "accepted_vouchers": p.accepted_vouchers,
+                    "landlord": p.landlord,
+                    "image_url": p.image_url,
+                    "listing_source": p.listing_source
+                }
+                for p in properties
+            ]
+            
+        return jsonify({
+            "status": "success", 
+            "saved_properties": saved_properties
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        session.close()
+
+# Enhanced property search with AI recommendations
+@app.route('/properties/recommended', methods=['GET'])
+def get_recommended_properties():
+    user_id = request.args.get('user_id')
+    limit = int(request.args.get('limit', 10))
+    
+    if not user_id:
+        return jsonify({"status": "error", "message": "User ID required"}), 400
+    
+    # Track usage and check limits
+    session = Session()
+    try:
+        user = session.query(UserProfile).filter_by(id=user_id).first()
+        if not user:
+            session.close()
+            return jsonify({"status": "error", "message": "User not found"}), 404
+        
+        # Check if daily limit reached for free users
+        if not user.premium:
+            # Reset usage count if it's a new day
+            today = datetime.utcnow().date()
+            last_reset = user.last_reset.date() if user.last_reset else None
+            
+            if last_reset != today:
+                user.usage_count = 0
+                user.last_reset = datetime.utcnow()
+            
+            if user.usage_count >= 10:  # Daily limit for free tier
+                session.close()
+                return jsonify({
+                    "status": "limit_reached", 
+                    "message": "Daily search limit reached. Upgrade to premium or try again tomorrow.",
+                    "remaining": 0
+                }), 429
+            
+            # Increment usage count
+            user.usage_count += 1
+        
+        session.commit()
+        
+        # Get user preferences
+        preferences = user.preferences if user.preferences else {}
+        
+        # Get recommended properties based on preferences
+        recommended = recommend_properties_for_user(user_id, preferences, limit)
+        
+        return jsonify({
+            "status": "success", 
+            "properties": recommended,
+            "remaining_searches": None if user.premium else (10 - user.usage_count)
+        })
+    except Exception as e:
+        session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        session.close()
+
+# AI recommendation engine
+def recommend_properties_for_user(user_id, preferences, limit=10):
+    """Generate personalized property recommendations"""
+    session = Session()
+    try:
+        # Basic filtering based on preferences
+        query = session.query(Property).filter(Property.active == True)
+        
+        # Apply filters from preferences
+        if preferences.get('neighborhoods'):
+            query = query.filter(Property.neighborhood.in_(preferences['neighborhoods']))
+        
+        if preferences.get('max_rent'):
+            query = query.filter(Property.rent <= preferences['max_rent'])
+            
+        if preferences.get('bedrooms') and preferences['bedrooms'] != 'Any':
+            query = query.filter(Property.bedrooms == preferences['bedrooms'])
+            
+        if preferences.get('voucher_types'):
+            # This is simplified - in reality you'd need a more complex query to check array contents
+            # For a proper implementation, use a database that supports array operations like PostgreSQL
+            query = query.filter(Property.accepted_vouchers.overlap(preferences['voucher_types']))
+        
+        # Get recent search history to boost similar properties
+        user = session.query(UserProfile).filter_by(id=user_id).first()
+        search_history = user.search_history if user and user.search_history else []
+        
+        # Get properties that match basic criteria
+        matching_properties = query.all()
+        
+        # In a real AI recommendation system, we would score each property based on multiple factors
+        # Here's a simplified scoring approach:
+        scored_properties = []
+        for prop in matching_properties:
+            score = 0
+            
+            # Boost score for properties in recently searched neighborhoods
+            for search in search_history[-5:]:  # Look at last 5 searches
+                if search.get('neighborhood') == prop.neighborhood:
+                    score += 10
+                    
+                # Boost for price match (within 10% of searched price)
+                if search.get('price') and abs(search['price'] - prop.rent) / search['price'] < 0.1:
+                    score += 5
+                    
+                # Boost for bedrooms match
+                if search.get('bedrooms') and search['bedrooms'] == prop.bedrooms:
+                    score += 5
+            
+            # Additional scoring based on preferences
+            if preferences.get('preferred_features'):
+                for feature in preferences['preferred_features']:
+                    if feature in prop.features:
+                        score += 3
+            
+            # Boost properties with the same landlord as previously viewed/saved
+            if preferences.get('preferred_landlords') and prop.landlord in preferences['preferred_landlords']:
+                score += 8
+                
+            # Penalize properties that are far from preferred locations (if applicable)
+            if preferences.get('preferred_locations') and prop.coordinates:
+                # This would require a distance calculation based on coordinates
+                # Simplified version:
+                for location in preferences['preferred_locations']:
+                    distance = calculate_distance(location, prop.coordinates)
+                    if distance < 2:  # Within 2 miles/km
+                        score += 5
+                    elif distance < 5:  # Within 5 miles/km
+                        score += 2
+            
+            scored_properties.append((prop, score))
+        
+        # Sort by score (descending)
+        scored_properties.sort(key=lambda x: x[1], reverse=True)
+        
+        # Return top N properties
+        top_properties = [
+            {
+                "id": p[0].id,
+                "title": p[0].title,
+                "address": p[0].address,
+                "neighborhood": p[0].neighborhood,
+                "bedrooms": p[0].bedrooms,
+                "rent": p[0].rent,
+                "accepted_vouchers": p[0].accepted_vouchers,
+                "landlord": p[0].landlord,
+                "image_url": p[0].image_url,
+                "listing_source": p[0].listing_source,
+                "relevance_score": p[1],
+                "features": p[0].features
+            }
+            for p in scored_properties[:limit]
+        ]
+        
+        # Update user's search history with this search
+        if user:
+            # Add current search parameters to history
+            if len(search_history) >= 20:  # Keep history to reasonable size
+                search_history = search_history[1:]  # Remove oldest search
+            
+            # Add current search parameters
+            current_search = {
+                'timestamp': datetime.utcnow().isoformat(),
+                'preferences': preferences
+            }
+            search_history.append(current_search)
+            user.search_history = search_history
+            session.commit()
+        
+        return top_properties
+        
+    except Exception as e:
+        session.rollback()
+        logging.error(f"Error in recommendation engine: {str(e)}")
+        return []  # Return empty list on error
+    finally:
+        session.close()
+
+# Helper function for distance calculation
+def calculate_distance(point1, point2):
+    """
+    Calculate distance between two points (latitude, longitude)
+    Returns distance in miles/km
+    """
+    # Simplified distance calculation - in a real app, use a proper geospatial library
+    # This is a crude approximation using Euclidean distance
+    # For accurate distance, use the Haversine formula or a geospatial library
+    return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)**0.5
+
+# Basic property routes
+@app.route('/properties', methods=['GET'])
+def search_properties():
+    # Get search parameters
+    neighborhood = request.args.get('neighborhood')
+    min_bedrooms = request.args.get('min_bedrooms')
+    max_rent = request.args.get('max_rent')
+    voucher_type = request.args.get('voucher_type')
+    limit = int(request.args.get('limit', 20))
+    offset = int(request.args.get('offset', 0))
+    
+    # Build query
+    session = Session()
+    try:
+        query = session.query(Property).filter(Property.active == True)
+        
+        if neighborhood:
+            query = query.filter(Property.neighborhood == neighborhood)
+            
+        if min_bedrooms:
+            query = query.filter(Property.bedrooms >= int(min_bedrooms))
+            
+        if max_rent:
+            query = query.filter(Property.rent <= int(max_rent))
+            
+        if voucher_type:
+            # This is simplified - in a real app, you'd need a more complex query
+            # to check if the voucher type is in the accepted_vouchers array
+            pass
+            
+        # Get total count for pagination
+        total_count = query.count()
+        
+        # Apply pagination
+        properties = query.offset(offset).limit(limit).all()
+        
+        # Format results
+        results = [
+            {
+                "id": p.id,
+                "title": p.title,
+                "address": p.address,
+                "neighborhood": p.neighborhood, 
+                "bedrooms": p.bedrooms,
+                "rent": p.rent,
+                "accepted_vouchers": p.accepted_vouchers,
+                "landlord": p.landlord,
+                "image_url": p.image_url,
+                "listing_source": p.listing_source
+            }
+            for p in properties
+        ]
+        
+        return jsonify({
+            "status": "success",
+            "properties": results,
+            "total": total_count,
+            "page": offset // limit + 1,
+            "total_pages": (total_count + limit - 1) // limit
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        session.close()
+
+@app.route('/properties/<property_id>', methods=['GET'])
+def get_property_details(property_id):
+    session = Session()
+    try:
+        property = session.query(Property).filter_by(id=property_id).first()
+        
+        if not property:
+            session.close()
+            return jsonify({"status": "error", "message": "Property not found"}), 404
+            
+        # Format full property details
+        details = {
+            "id": property.id,
+            "title": property.title,
+            "address": property.address,
+            "neighborhood": property.neighborhood,
+            "bedrooms": property.bedrooms,
+            "bathrooms": property.bathrooms,
+            "rent": property.rent,
+            "deposit": property.deposit,
+            "accepted_vouchers": property.accepted_vouchers,
+            "features": property.features,
+            "description": property.description,
+            "landlord": property.landlord,
+            "image_url": property.image_url,
+            "listing_source": property.listing_source,
+            "available_date": property.available_date.isoformat() if property.available_date else None
+        }
+        
+        return jsonify({
+            "status": "success",
+            "property": details
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally: 
+        session.close()
+
+# Admin routes for property management
+@app.route('/admin/properties', methods=['POST'])
+def add_property():
+    # In a real app, this would require admin authentication
+    data = request.json
+    
+    # Validate required fields
+    required_fields = ["title", "address", "rent"]
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"status": "error", "message": f"Missing required field: {field}"}), 400
+    
+    # Create property ID
+    property_id = hashlib.md5((data['address'] + str(datetime.utcnow())).encode()).hexdigest()
+    
+    # Create new property
+    new_property = Property(
+        id=property_id,
+        title=data.get('title'),
+        address=data.get('address'),
+        neighborhood=data.get('neighborhood'),
+        coordinates=data.get('coordinates'),
+        bedrooms=data.get('bedrooms'),
+        bathrooms=data.get('bathrooms'),
+        rent=data.get('rent'),
+        deposit=data.get('deposit'),
+        accepted_vouchers=data.get('accepted_vouchers', []),
+        features=data.get('features', []),
+        description=data.get('description'),
+        landlord=data.get('landlord'),
+        image_url=data.get('image_url'),
+        listing_source=data.get('listing_source'),
+        available_date=datetime.fromisoformat(data['available_date']) if data.get('available_date') else None,
+        active=True
+    )
+    
+    session = Session()
+    try:
+        session.add(new_property)
+        session.commit()
+        return jsonify({
+            "status": "success",
+            "message": "Property added successfully",
+            "property_id": property_id
+        })
+    except Exception as e:
+        session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        session.close()
+
+@app.route('/admin/properties/<property_id>', methods=['PUT'])
+def update_property(property_id):
+    # In a real app, this would require admin authentication
+    data = request.json
+    
+    session = Session()
+    try:
+        property = session.query(Property).filter_by(id=property_id).first()
+        
+        if not property:
+            session.close()
+            return jsonify({"status": "error", "message": "Property not found"}), 404
+            
+        # Update property fields
+        for key, value in data.items():
+            if hasattr(property, key):
+                if key == 'available_date' and value:
+                    value = datetime.fromisoformat(value)
+                setattr(property, key, value)
+                
+        session.commit()
+        return jsonify({
+            "status": "success",
+            "message": "Property updated successfully"
+        })
+    except Exception as e:
+        session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        session.close()
+
+@app.route('/admin/properties/<property_id>/deactivate', methods=['POST'])
+def deactivate_property(property_id):
+    # In a real app, this would require admin authentication
+    session = Session()
+    try:
+        property = session.query(Property).filter_by(id=property_id).first()
+        
+        if not property:
+            session.close()
+            return jsonify({"status": "error", "message": "Property not found"}), 404
+            
+        property.active = False
+        session.commit()
+        return jsonify({
+            "status": "success",
+            "message": "Property deactivated successfully"
+        })
+    except Exception as e:
+        session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        session.close()
+
+# Utility routes
+@app.route('/neighborhoods', methods=['GET'])
+def get_neighborhoods():
+    session = Session()
+    try:
+        # Get unique neighborhoods
+        neighborhoods = session.query(Property.neighborhood).distinct().all()
+        neighborhood_list = [n[0] for n in neighborhoods if n[0]]
+        
+        return jsonify({
+            "status": "success",
+            "neighborhoods": neighborhood_list
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        session.close()
+
+# Run the app
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Run Flask app
+    app.run(debug=True)

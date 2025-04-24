@@ -1,0 +1,25 @@
+2025-04-24 09:43:09,715 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-04-24 09:43:09,716 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-24 09:43:09,721 - werkzeug - INFO -  * Restarting with stat
+2025-04-24 09:43:10,982 - werkzeug - WARNING -  * Debugger is active!
+2025-04-24 09:43:11,026 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-24 09:43:21,211 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:43:21] "GET / HTTP/1.1" 200 -
+2025-04-24 09:44:17,624 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:44:17] "OPTIONS /analytics/track HTTP/1.1" 200 -
+2025-04-24 09:44:17,639 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:44:17] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-24 09:44:17,693 - housing_navigator - INFO - Analytics event: {'event_type': 'page_view', 'event_data': {'page': 'housing_navigator'}, 'user_id': None, 'timestamp': '2025-04-24T13:44:17.606Z'}
+2025-04-24 09:44:17,714 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:44:17] "POST /analytics/track HTTP/1.1" 200 -
+2025-04-24 09:44:17,724 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:44:17] "GET /properties HTTP/1.1" 200 -
+2025-04-24 09:44:26,791 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:44:26] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-24 09:44:26,798 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:44:26] "GET /properties HTTP/1.1" 200 -
+2025-04-24 09:44:38,228 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:44:38] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-24 09:44:38,271 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:44:38] "GET /properties HTTP/1.1" 200 -
+2025-04-24 09:44:41,888 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:44:41] "GET /properties HTTP/1.1" 200 -
+2025-04-24 09:45:18,373 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:45:18] "GET /properties?neighborhood=All%20NYC&bedrooms=Any&max_rent=2000&voucher_types=Section%208,CityFHEPS&page=2&per_page=10 HTTP/1.1" 200 -
+2025-04-24 09:46:02,113 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:46:02] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-24 09:46:02,158 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:46:02] "GET /properties HTTP/1.1" 200 -
+2025-04-24 09:46:11,152 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:46:11] "[33mGET /properties/4c2c7b0bbfcda756552a5dade665696b HTTP/1.1[0m" 404 -
+2025-04-24 09:58:10,346 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:58:10] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-24 09:58:10,704 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:58:10] "GET /properties HTTP/1.1" 200 -
+2025-04-24 09:58:16,209 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:58:16] "[33mGET /properties/0bf1acc6648eaf7456cd2a716c4c91fa HTTP/1.1[0m" 404 -
+2025-04-24 10:00:27,083 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 10:00:27] "[33mGET /properties/4c2c7b0bbfcda756552a5dade665696b HTTP/1.1[0m" 404 -

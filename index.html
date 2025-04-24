@@ -139,6 +139,83 @@
         .property-info a:hover, .property-details a:hover {
             text-decoration: underline;
         }
+        .user-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .user-controls button {
+            width: auto;
+            margin-left: 10px;
+        }
+        .saved-properties-btn {
+            background: #2ecc71;
+        }
+        .saved-properties-btn:hover {
+            background: #27ae60;
+        }
+        .login-container {
+            text-align: right;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #f1f1f1;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            width: auto;
+            margin: 0 5px;
+            padding: 8px 15px;
+        }
+        .relevance-score {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            overflow: auto;
+        }
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 60%;
+            border-radius: 8px;
+            max-width: 500px;
+        }
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-modal:hover {
+            color: #000;
+        }
     </style>
 </head>
 <body>
@@ -147,59 +224,81 @@
         <p>Find apartments in NYC that accept housing vouchers</p>
     </header>
 
-    <div class="search-container">
-        <form id="search-form">
-            <div class="form-group">
-                <label for="neighborhood">Neighborhood</label>
-                <select id="neighborhood">
-                    <option value="All NYC">All NYC</option>
-                    <option value="Astoria">Astoria</option>
-                    <option value="Bedford-Stuyvesant">Bedford-Stuyvesant</option>
-                    <option value="Bushwick">Bushwick</option>
-                    <option value="Crown Heights">Crown Heights</option>
-                    <option value="East Harlem">East Harlem</option>
-                    <option value="Flatbush">Flatbush</option>
-                    <option value="Washington Heights">Washington Heights</option>
-                    <option value="South Bronx">South Bronx</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="bedrooms">Bedrooms</label>
-                <select id="bedrooms">
-                    <option value="Any">Any</option>
-                    <option value="1">1 Bedroom</option>
-                    <option value="2">2 Bedrooms</option>
-                    <option value="3">3+ Bedrooms</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="max-rent">Maximum Monthly Rent</label>
-                <input type="range" id="max-rent" min="1000" max="3000" step="100" value="2000">
-                <div id="max-rent-display">$2,000</div>
-            </div>
-            <div class="form-group">
-                <label>Voucher Types</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="section8" name="voucher_types" value="Section 8" checked>
-                        <label for="section8">Section 8</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="cityfheps" name="voucher_types" value="CityFHEPS" checked>
-                        <label for="cityfheps">CityFHEPS</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="fheps" name="voucher_types" value="FHEPS">
-                        <label for="fheps">FHEPS</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="hasa" name="voucher_types" value="HASA">
-                        <label for="hasa">HASA</label>
+    <div class="user-controls">
+        <div class="tabs">
+            <button class="tab active" data-tab="search">Search</button>
+            <button class="tab" data-tab="recommended">Recommended</button>
+        </div>
+        <div class="login-container">
+            <button id="login-btn">Login / Register</button>
+            <button class="saved-properties-btn" id="saved-properties-btn" style="display: none;">Saved Properties</button>
+        </div>
+    </div>
+
+    <div id="search-tab" class="tab-content">
+        <div class="search-container">
+            <form id="search-form">
+                <div class="form-group">
+                    <label for="neighborhood">Neighborhood</label>
+                    <select id="neighborhood">
+                        <option value="All NYC">All NYC</option>
+                        <option value="Astoria">Astoria</option>
+                        <option value="Bedford-Stuyvesant">Bedford-Stuyvesant</option>
+                        <option value="Bushwick">Bushwick</option>
+                        <option value="Crown Heights">Crown Heights</option>
+                        <option value="East Harlem">East Harlem</option>
+                        <option value="Flatbush">Flatbush</option>
+                        <option value="Washington Heights">Washington Heights</option>
+                        <option value="South Bronx">South Bronx</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bedrooms">Bedrooms</label>
+                    <select id="bedrooms">
+                        <option value="Any">Any</option>
+                        <option value="1">1 Bedroom</option>
+                        <option value="2">2 Bedrooms</option>
+                        <option value="3">3+ Bedrooms</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="max-rent">Maximum Monthly Rent</label>
+                    <input type="range" id="max-rent" min="1000" max="3000" step="100" value="2000">
+                    <div id="max-rent-display">$2,000</div>
+                </div>
+                <div class="form-group">
+                    <label>Voucher Types</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="section8" name="voucher_types" value="Section 8" checked>
+                            <label for="section8">Section 8</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="cityfheps" name="voucher_types" value="CityFHEPS" checked>
+                            <label for="cityfheps">CityFHEPS</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="fheps" name="voucher_types" value="FHEPS">
+                            <label for="fheps">FHEPS</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="hasa" name="voucher_types" value="HASA">
+                            <label for="hasa">HASA</label>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <button type="submit" id="search-button">Find Housing</button>
-        </form>
+                <button type="submit" id="search-button">Find Housing</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="recommended-tab" class="tab-content" style="display: none;">
+        <div class="search-container">
+            <h2>Personalized Recommendations</h2>
+            <p>Based on your preferences and search history, we recommend these properties:</p>
+            <button id="get-recommendations-btn">Get Recommendations</button>
+            <p id="search-limit" style="display: none;">Remaining searches today: <span id="remaining-searches">10</span></p>
+        </div>
     </div>
 
     <div class="loading">
@@ -214,12 +313,295 @@
 
     <div class="results-container" id="results"></div>
 
+    <div class="pagination" id="pagination" style="display: none;">
+        <button id="prev-page" disabled>Previous</button>
+        <span id="page-info">Page 1 of 1</span>
+        <button id="next-page">Next</button>
+    </div>
+
+    <!-- Login/Register Modal -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Login</h2>
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group" id="name-field" style="display: none;">
+                    <label for="name">Name</label>
+                    <input type="text" id="name">
+                </div>
+                <button type="submit" id="auth-submit">Login</button>
+            </form>
+            <p id="auth-toggle">Don't have an account? <a href="#" id="toggle-auth">Register</a></p>
+            <p id="auth-message" style="color: red;"></p>
+        </div>
+    </div>
+
+    <!-- Saved Properties Modal -->
+    <div id="saved-properties-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Your Saved Properties</h2>
+            <div id="saved-properties-list"></div>
+        </div>
+    </div>
+
     <script>
+        // Global variables
+        let currentUser = null;
+        let currentPage = 1;
+        let totalPages = 1;
+        let propertiesPerPage = 10;
+        let currentTab = 'search';
+
         // Update the displayed max rent value when slider changes
         document.getElementById('max-rent').addEventListener('input', function() {
             document.getElementById('max-rent-display').textContent = '$' + this.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         });
 
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                
+                // Update active tab
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show only the active tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById(tabName + '-tab').style.display = 'block';
+                
+                currentTab = tabName;
+                
+                // Clear results when switching tabs
+                document.getElementById('results').innerHTML = '';
+                document.querySelector('.no-results').style.display = 'none';
+                document.getElementById('pagination').style.display = 'none';
+            });
+        });
+
+        // Login/Register Modal Functionality
+        document.getElementById('login-btn').addEventListener('click', function() {
+            document.getElementById('auth-modal').style.display = 'block';
+        });
+
+        document.querySelectorAll('.close-modal').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+
+        // Toggle between login and register
+        document.getElementById('toggle-auth').addEventListener('click', function(e) {
+            e.preventDefault();
+            const isLogin = document.getElementById('modal-title').textContent === 'Login';
+            
+            document.getElementById('modal-title').textContent = isLogin ? 'Register' : 'Login';
+            document.getElementById('auth-submit').textContent = isLogin ? 'Register' : 'Login';
+            document.getElementById('name-field').style.display = isLogin ? 'block' : 'none';
+            document.getElementById('auth-toggle').innerHTML = isLogin ? 
+                'Already have an account? <a href="#" id="toggle-auth">Login</a>' : 
+                'Don\'t have an account? <a href="#" id="toggle-auth">Register</a>';
+            
+            // Re-attach event listener to the new toggle link
+            document.getElementById('toggle-auth').addEventListener('click', arguments.callee);
+        });
+
+        // Handle auth form submission
+        document.getElementById('auth-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const isLogin = document.getElementById('modal-title').textContent === 'Login';
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (isLogin) {
+                // This is a simplified login - in a real app you'd have a proper login endpoint
+                try {
+                    // Simulate login success for demo purposes
+                    currentUser = {
+                        id: 'user123', // In a real app, this would come from the server
+                        email: email,
+                        name: 'Demo User'
+                    };
+                    
+                    updateUIForLoggedInUser();
+                    document.getElementById('auth-modal').style.display = 'none';
+                } catch (error) {
+                    document.getElementById('auth-message').textContent = 'Login failed. Please try again.';
+                }
+            } else {
+                // Register new user
+                const name = document.getElementById('name').value;
+                
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            password: password,
+                            name: name
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        currentUser = {
+                            id: data.user_id,
+                            email: email,
+                            name: name
+                        };
+                        
+                        updateUIForLoggedInUser();
+                        document.getElementById('auth-modal').style.display = 'none';
+                    } else {
+                        document.getElementById('auth-message').textContent = data.message || 'Registration failed.';
+                    }
+                } catch (error) {
+                    document.getElementById('auth-message').textContent = 'Registration failed. Please try again.';
+                }
+            }
+        });
+
+        // Update UI elements when user is logged in
+        function updateUIForLoggedInUser() {
+            document.getElementById('login-btn').textContent = 'Logout (' + currentUser.name + ')';
+            document.getElementById('saved-properties-btn').style.display = 'inline-block';
+            
+            // Update login button to handle logout
+            document.getElementById('login-btn').removeEventListener('click', null);
+            document.getElementById('login-btn').addEventListener('click', function() {
+                currentUser = null;
+                document.getElementById('login-btn').textContent = 'Login / Register';
+                document.getElementById('saved-properties-btn').style.display = 'none';
+                
+                // Reset login button to open modal
+                document.getElementById('login-btn').removeEventListener('click', null);
+                document.getElementById('login-btn').addEventListener('click', function() {
+                    document.getElementById('auth-modal').style.display = 'block';
+                });
+            });
+        }
+
+        // Handle saved properties button
+        document.getElementById('saved-properties-btn').addEventListener('click', async function() {
+            if (!currentUser) {
+                document.getElementById('auth-modal').style.display = 'block';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/user/saved_properties?user_id=${currentUser.id}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    displaySavedProperties(data.saved_properties);
+                } else {
+                    alert('Error loading saved properties');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading saved properties');
+            }
+        });
+
+        // Display saved properties in modal
+        function displaySavedProperties(properties) {
+            const savedPropertiesList = document.getElementById('saved-properties-list');
+            savedPropertiesList.innerHTML = '';
+            
+            if (properties.length === 0) {
+                savedPropertiesList.innerHTML = '<p>You haven\'t saved any properties yet.</p>';
+            } else {
+                properties.forEach(property => {
+                    const propertyItem = document.createElement('div');
+                    propertyItem.className = 'property-card';
+                    
+                    // Generate voucher badges HTML
+                    const voucherBadges = property.accepted_vouchers 
+                        ? property.accepted_vouchers.map(voucher => 
+                            `<span class="voucher-badge">${voucher}</span>`
+                        ).join('') 
+                        : '';
+                    
+                    propertyItem.innerHTML = `
+                        <div class="property-info">
+                            <h3>${property.title}</h3>
+                            <p>${property.address}</p>
+                            <p>${property.bedrooms} BR | ${property.neighborhood}</p>
+                            <div>${voucherBadges}</div>
+                        </div>
+                        <div class="property-details">
+                            <p><strong>$${property.rent}/month</strong></p>
+                            <p>Landlord: ${property.landlord}</p>
+                        </div>
+                    `;
+                    
+                    savedPropertiesList.appendChild(propertyItem);
+                });
+            }
+            
+            document.getElementById('saved-properties-modal').style.display = 'block';
+        }
+
+        // Handle getting recommendations
+        document.getElementById('get-recommendations-btn').addEventListener('click', async function() {
+            if (!currentUser) {
+                document.getElementById('auth-modal').style.display = 'block';
+                return;
+            }
+            
+            // Show loading
+            document.querySelector('.loading').style.display = 'block';
+            document.querySelector('.no-results').style.display = 'none';
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/properties/recommended?user_id=${currentUser.id}&limit=10`);
+                const data = await response.json();
+                
+                // Hide loading
+                document.querySelector('.loading').style.display = 'none';
+                
+                if (data.status === 'success' && data.properties && data.properties.length > 0) {
+                    displayResults(data.properties, true);
+                    
+                    // Update remaining searches display
+                    if (data.remaining_searches !== null) {
+                        document.getElementById('remaining-searches').textContent = data.remaining_searches;
+                        document.getElementById('search-limit').style.display = 'block';
+                    } else {
+                        document.getElementById('search-limit').style.display = 'none';
+                    }
+                } else if (data.status === 'limit_reached') {
+                    alert('You\'ve reached your daily search limit. Upgrade to premium for unlimited searches.');
+                } else {
+                    document.querySelector('.no-results').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.querySelector('.loading').style.display = 'none';
+                document.querySelector('.no-results').style.display = 'block';
+                document.querySelector('.no-results h3').textContent = 'Error getting recommendations';
+                document.querySelector('.no-results p').textContent = 'Please try again later';
+            }
+        });
+
+        // Handle property search form submission
         document.getElementById('search-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -237,17 +619,12 @@
             document.getElementById('results').innerHTML = '';
             
             try {
-                const response = await fetch('http://127.0.0.1:5000/scan_housing', {
-                    method: 'POST',
+                // Updated endpoint to match our Flask implementation
+                const response = await fetch('http://127.0.0.1:5000/properties', {
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        neighborhood: neighborhood,
-                        max_rent: maxRent,
-                        bedrooms: bedrooms,
-                        voucher_types: voucherTypes
-                    })
+                    }
                 });
                 
                 const data = await response.json();
@@ -256,6 +633,11 @@
                 document.querySelector('.loading').style.display = 'none';
                 
                 if (data.status === 'success' && data.properties && data.properties.length > 0) {
+                    // Update pagination info
+                    totalPages = data.total_pages || 1;
+                    currentPage = data.page || 1;
+                    updatePagination();
+                    
                     displayResults(data.properties);
                 } else {
                     document.querySelector('.no-results').style.display = 'block';
@@ -269,22 +651,29 @@
             }
         });
 
-        function displayResults(properties) {
+        // Display search results
+        function displayResults(properties, isRecommended = false) {
             const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
             
             properties.forEach(property => {
                 const propertyCard = document.createElement('div');
                 propertyCard.className = 'property-card';
                 
                 // Generate voucher badges HTML
-                const voucherBadges = property.accepted_vouchers.map(voucher => 
-                    `<span class="voucher-badge">${voucher}</span>`
-                ).join('');
+                const voucherBadges = property.accepted_vouchers 
+                    ? property.accepted_vouchers.map(voucher => 
+                        `<span class="voucher-badge">${voucher}</span>`
+                    ).join('') 
+                    : '';
                 
-                // Generate subway line icons
-                const subwayLines = property.subway_lines.map(line => 
-                    `<span class="subway-line">${line}</span>`
-                ).join('');
+                // Generate subway line icons if available
+                let subwayLines = '';
+                if (property.subway_lines) {
+                    subwayLines = property.subway_lines.map(line => 
+                        `<span class="subway-line">${line}</span>`
+                    ).join('');
+                }
                 
                 // Create external URLs based on the listing source
                 let externalUrl = "#";
@@ -296,16 +685,17 @@
                     externalUrl = "https://streeteasy.com/for-rent/nyc/status:open";
                 }
                 
-                // Add property ID to URL if available (for real implementation)
-                // if (property.id) {
-                //     externalUrl += property.id;
-                // }
+                // Recommendation score display
+                let scoreDisplay = '';
+                if (isRecommended && property.relevance_score) {
+                    scoreDisplay = `<p class="relevance-score">Match: ${Math.round(property.relevance_score)}%</p>`;
+                }
                 
                 propertyCard.innerHTML = `
                     <div class="property-info">
-                        <h3><a href="${externalUrl}" target="_blank">${property.title}</a></h3>
+                        <h3><a href="#" class="property-detail-link" data-id="${property.id}">${property.title}</a></h3>
                         <p>${property.address}</p>
-                        <p>${property.bedrooms} BR | ${property.bathrooms} Bath | Available: ${formatDate(property.date_available)}</p>
+                        <p>${property.bedrooms} BR | Available: ${property.available_date ? formatDate(property.available_date) : 'Now'}</p>
                         <div>
                             ${voucherBadges}
                         </div>
@@ -317,25 +707,242 @@
                         <p><strong>$${property.rent}/month</strong></p>
                         <p>Landlord: ${property.landlord}</p>
                         <p>Source: <a href="${externalUrl}" target="_blank">${property.listing_source}</a></p>
+                        ${scoreDisplay}
+                        ${currentUser ? `<button class="save-property-btn" data-id="${property.id}">Save</button>` : ''}
                     </div>
                 `;
                 
-                // Make the entire card clickable
-                propertyCard.addEventListener('click', function(e) {
-                    // Prevent triggering when clicking on links inside the card
-                    if (!e.target.closest('a')) {
-                        window.open(externalUrl, '_blank');
-                    }
-                });
-                
                 resultsContainer.appendChild(propertyCard);
             });
+            
+            // Add event listeners to save buttons
+            if (currentUser) {
+                document.querySelectorAll('.save-property-btn').forEach(btn => {
+                    btn.addEventListener('click', async function(e) {
+                        e.stopPropagation();
+                        const propertyId = this.getAttribute('data-id');
+                        
+                        try {
+                            const response = await fetch('http://127.0.0.1:5000/user/saved_properties', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    user_id: currentUser.id,
+                                    property_id: propertyId
+                                })
+                            });
+                            
+                            const data = await response.json();
+                            
+                            if (data.status === 'success') {
+                                this.textContent = 'Saved';
+                                this.disabled = true;
+                                this.style.background = '#95a5a6';
+                            } else {
+                                alert('Error saving property');
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert('Error saving property');
+                        }
+                    });
+                });
+            }
+            
+            // Add event listeners to property detail links
+            document.querySelectorAll('.property-detail-link').forEach(link => {
+                link.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const propertyId = this.getAttribute('data-id');
+                    viewPropertyDetails(propertyId);
+                });
+            });
+            
+            // Show pagination if needed
+            document.getElementById('pagination').style.display = totalPages > 1 ? 'flex' : 'none';
         }
+
+        // View property details
+        async function viewPropertyDetails(propertyId) {
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/properties/${propertyId}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // In a real app, show a modal with detailed property info
+                    alert(`Property details for: ${data.property.title}\n\nAddress: ${data.property.address}\nRent: $${data.property.rent}\nBedrooms: ${data.property.bedrooms}\nBathrooms: ${data.property.bathrooms}\n\nDescription: ${data.property.description}`);
+                } else {
+                    alert('Error loading property details');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading property details');
+            }
+        }
+
+        // Update pagination controls
+        function updatePagination() {
+            document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
+        }
+
+        // Pagination event listeners
+        document.getElementById('prev-page').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadPageResults();
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadPageResults();
+            }
+        });
+
+        // Load results for current page
+        async function loadPageResults() {
+            // Show loading
+            document.querySelector('.loading').style.display = 'block';
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                const neighborhood = document.getElementById('neighborhood').value;
+                const bedrooms = document.getElementById('bedrooms').value;
+                const maxRent = parseInt(document.getElementById('max-rent').value);
+                
+                // Get selected voucher types 
+
+                // Get selected voucher types
+const voucherCheckboxes = document.querySelectorAll('input[name="voucher_types"]:checked');
+const voucherTypes = Array.from(voucherCheckboxes).map(checkbox => checkbox.value);
+
+const response = await fetch(`http://127.0.0.1:5000/properties?neighborhood=${encodeURIComponent(neighborhood)}&bedrooms=${bedrooms}&max_rent=${maxRent}&voucher_types=${voucherTypes.join(',')}&page=${currentPage}&per_page=${propertiesPerPage}`);
+                
+const data = await response.json();
+                
+// Hide loading
+document.querySelector('.loading').style.display = 'none';
+                
+if (data.status === 'success' && data.properties && data.properties.length > 0) {
+    // Update pagination info
+    totalPages = data.total_pages || 1;
+    currentPage = data.page || 1;
+    updatePagination();
+                    
+    displayResults(data.properties);
+} else {
+    document.querySelector('.no-results').style.display = 'block';
+}
+} catch (error) {
+    console.error('Error:', error);
+    document.querySelector('.loading').style.display = 'none';
+    document.querySelector('.no-results').style.display = 'block';
+    document.querySelector('.no-results h3').textContent = 'Error loading results';
+    document.querySelector('.no-results p').textContent = 'Please try again later';
+}
+}
+
+// Helper function to format dates
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+// Initialize event listeners and UI state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is already logged in (e.g., from localStorage in a real app)
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            updateUIForLoggedInUser();
+        } catch (e) {
+            localStorage.removeItem('currentUser');
+        }
+    }
+    
+    // Initial search to populate results
+    document.getElementById('search-button').click();
+    
+    // Close modals when clicking outside of content
+    window.addEventListener('click', function(event) {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+});
+
+// Save user to localStorage when logged in
+function saveUserToLocalStorage() {
+    if (currentUser) {
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    } else {
+        localStorage.removeItem('currentUser');
+    }
+}
+
+// Function to handle property contact request
+async function contactLandlord(propertyId) {
+    if (!currentUser) {
+        document.getElementById('auth-modal').style.display = 'block';
+        return;
+    }
+    
+    try {
+        const response = await fetch('http://127.0.0.1:5000/properties/contact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: currentUser.id,
+                property_id: propertyId
+            })
+        });
         
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            alert('Contact request sent successfully! The landlord will contact you soon.');
+        } else {
+            alert('Error sending contact request: ' + (data.message || 'Please try again later.'));
         }
-    </script>
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error sending contact request. Please try again later.');
+    }
+}
+
+// Function to track analytics
+function trackEvent(eventType, eventData) {
+    // In a real app, this would send data to an analytics service
+    console.log('ANALYTICS:', eventType, eventData);
+    
+    // Example implementation with fetch
+    fetch('http://127.0.0.1:5000/analytics/track', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            event_type: eventType,
+            event_data: eventData,
+            user_id: currentUser ? currentUser.id : null,
+            timestamp: new Date().toISOString()
+        })
+    }).catch(err => console.error('Analytics error:', err));
+}
+
+// Track page views
+trackEvent('page_view', { page: 'housing_navigator' });
+</script>
 </body>
 </html>
