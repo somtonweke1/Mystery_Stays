@@ -23,3 +23,36 @@
 2025-04-24 09:58:10,704 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:58:10] "GET /properties HTTP/1.1" 200 -
 2025-04-24 09:58:16,209 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 09:58:16] "[33mGET /properties/0bf1acc6648eaf7456cd2a716c4c91fa HTTP/1.1[0m" 404 -
 2025-04-24 10:00:27,083 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 10:00:27] "[33mGET /properties/4c2c7b0bbfcda756552a5dade665696b HTTP/1.1[0m" 404 -
+2025-04-24 10:48:55,416 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/Housing Navigator Data Collection Implementation/housing_scraper.py', reloading
+2025-04-24 10:48:56,625 - werkzeug - INFO -  * Restarting with stat
+2025-04-24 10:49:00,327 - werkzeug - WARNING -  * Debugger is active!
+2025-04-24 10:49:00,343 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-24 10:50:08,469 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/Housing Navigator Data Collection Implementation/scheduler.py', reloading
+2025-04-24 10:50:09,147 - werkzeug - INFO -  * Restarting with stat
+2025-04-24 10:50:13,436 - werkzeug - WARNING -  * Debugger is active!
+2025-04-24 10:50:13,458 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-24 10:53:42,149 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/Housing Navigator Data Collection Implementation/data_cleansing.py', reloading
+2025-04-24 10:53:42,958 - werkzeug - INFO -  * Restarting with stat
+2025-04-24 10:53:47,228 - werkzeug - WARNING -  * Debugger is active!
+2025-04-24 10:53:47,470 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-24 11:06:40,274 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/Housing_Navigator_Data_Collection/models.py', reloading
+2025-04-24 11:06:43,524 - werkzeug - INFO -  * Restarting with stat
+2025-04-24 11:06:53,572 - werkzeug - WARNING -  * Debugger is active!
+2025-04-24 11:06:53,615 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-24 16:56:45,792 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-04-24 16:56:45,794 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-24 16:56:45,806 - werkzeug - INFO -  * Restarting with stat
+2025-04-24 16:56:47,184 - werkzeug - WARNING -  * Debugger is active!
+2025-04-24 16:56:47,214 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-24 16:56:54,773 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:56:54] "GET / HTTP/1.1" 200 -
+2025-04-24 16:57:44,141 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:57:44] "OPTIONS /analytics/track HTTP/1.1" 200 -
+2025-04-24 16:57:44,145 - housing_navigator - INFO - Analytics event: {'event_type': 'page_view', 'event_data': {'page': 'housing_navigator'}, 'user_id': None, 'timestamp': '2025-04-24T20:57:44.135Z'}
+2025-04-24 16:57:44,145 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:57:44] "POST /analytics/track HTTP/1.1" 200 -
+2025-04-24 16:57:44,230 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:57:44] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-24 16:57:44,234 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:57:44] "GET /properties HTTP/1.1" 200 -
+2025-04-24 16:57:53,126 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:57:53] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-24 16:57:53,134 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:57:53] "GET /properties HTTP/1.1" 200 -
+2025-04-24 16:57:56,653 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:57:56] "[33mGET /properties/b54f616e73123f6715624dc1c9081fe3 HTTP/1.1[0m" 404 -
+2025-04-24 16:58:07,933 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:58:07] "GET /properties?neighborhood=All%20NYC&bedrooms=Any&max_rent=2000&voucher_types=Section%208,CityFHEPS&page=2&per_page=10 HTTP/1.1" 200 -
+2025-04-24 16:58:10,684 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:58:10] "[33mGET /properties/5c04c4e239abce0aa277c81ef4db2a63 HTTP/1.1[0m" 404 -

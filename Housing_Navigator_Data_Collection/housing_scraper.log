@@ -1,0 +1,6 @@
+2025-04-24 16:49:15,899 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-04-24 16:49:15,901 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-04-24 16:49:15,940 - apscheduler.scheduler - INFO - Added job "scrape_all_sources" to job store "default"
+2025-04-24 16:49:15,943 - apscheduler.scheduler - INFO - Added job "scrape_all_sources" to job store "default"
+2025-04-24 16:49:15,943 - apscheduler.scheduler - INFO - Scheduler started
+2025-04-24 16:49:15,952 - housing_scheduler - INFO - Scheduler started
