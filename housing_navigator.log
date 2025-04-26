@@ -158,3 +158,15 @@
 2025-04-26 17:10:07,275 - werkzeug - INFO -  * Restarting with stat
 2025-04-26 17:10:10,253 - werkzeug - WARNING -  * Debugger is active!
 2025-04-26 17:10:10,276 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 17:59:18,573 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/scrapers.py', reloading
+2025-04-26 17:59:19,529 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 17:59:23,148 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 17:59:23,172 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 18:01:19,511 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/management/commands/__init__.py', reloading
+2025-04-26 18:01:20,308 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 18:01:23,791 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 18:01:23,813 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 18:06:10,222 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/management/commands/scrapers.py', reloading
+2025-04-26 18:06:11,603 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 18:06:14,435 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 18:06:14,455 - werkzeug - INFO -  * Debugger PIN: 132-352-854

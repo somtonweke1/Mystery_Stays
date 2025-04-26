@@ -1,0 +1,1 @@
+from .scrapers import scrape_location_new_york, scrape_location_chicago
