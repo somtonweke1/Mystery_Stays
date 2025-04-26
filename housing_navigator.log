@@ -56,3 +56,105 @@
 2025-04-24 16:57:56,653 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:57:56] "[33mGET /properties/b54f616e73123f6715624dc1c9081fe3 HTTP/1.1[0m" 404 -
 2025-04-24 16:58:07,933 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:58:07] "GET /properties?neighborhood=All%20NYC&bedrooms=Any&max_rent=2000&voucher_types=Section%208,CityFHEPS&page=2&per_page=10 HTTP/1.1" 200 -
 2025-04-24 16:58:10,684 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 16:58:10] "[33mGET /properties/5c04c4e239abce0aa277c81ef4db2a63 HTTP/1.1[0m" 404 -
+2025-04-24 17:00:53,130 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 17:00:53] "OPTIONS /analytics/track HTTP/1.1" 200 -
+2025-04-24 17:00:53,133 - housing_navigator - INFO - Analytics event: {'event_type': 'page_view', 'event_data': {'page': 'housing_navigator'}, 'user_id': None, 'timestamp': '2025-04-24T21:00:53.103Z'}
+2025-04-24 17:00:53,134 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 17:00:53] "POST /analytics/track HTTP/1.1" 200 -
+2025-04-24 17:00:53,159 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 17:00:53] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-24 17:00:53,168 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 17:00:53] "GET /properties HTTP/1.1" 200 -
+2025-04-24 17:01:03,546 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 17:01:03] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-24 17:01:03,553 - werkzeug - INFO - 127.0.0.1 - - [24/Apr/2025 17:01:03] "GET /properties HTTP/1.1" 200 -
+2025-04-25 07:21:13,921 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:13] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-25 07:21:13,924 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:13] "OPTIONS /analytics/track HTTP/1.1" 200 -
+2025-04-25 07:21:13,969 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:13] "GET /properties HTTP/1.1" 200 -
+2025-04-25 07:21:13,971 - housing_navigator - INFO - Analytics event: {'event_type': 'page_view', 'event_data': {'page': 'housing_navigator'}, 'user_id': None, 'timestamp': '2025-04-25T11:21:13.881Z'}
+2025-04-25 07:21:13,980 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:13] "POST /analytics/track HTTP/1.1" 200 -
+2025-04-25 07:21:30,230 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:30] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-25 07:21:30,256 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:30] "GET /properties HTTP/1.1" 200 -
+2025-04-25 07:21:32,976 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:32] "GET /properties HTTP/1.1" 200 -
+2025-04-25 07:21:35,673 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:35] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-25 07:21:35,689 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:35] "GET /properties HTTP/1.1" 200 -
+2025-04-25 07:21:38,459 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:38] "GET /properties HTTP/1.1" 200 -
+2025-04-25 07:21:40,614 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:40] "GET /properties HTTP/1.1" 200 -
+2025-04-25 07:21:48,145 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:48] "[33mGET /properties/0304ca6fda45e77ce98d21a298bb5c16 HTTP/1.1[0m" 404 -
+2025-04-25 07:21:52,815 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:52] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-25 07:21:52,819 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:52] "GET /properties HTTP/1.1" 200 -
+2025-04-25 07:21:56,173 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:21:56] "[33mGET /properties/a114335fe2a501d14f7eab95530cddff HTTP/1.1[0m" 404 -
+2025-04-25 07:22:20,767 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:22:20] "GET /properties?neighborhood=All%20NYC&bedrooms=Any&max_rent=2000&voucher_types=Section%208,CityFHEPS&page=2&per_page=10 HTTP/1.1" 200 -
+2025-04-25 07:22:22,562 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:22:22] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-25 07:22:22,566 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 07:22:22] "GET /properties HTTP/1.1" 200 -
+2025-04-26 07:37:28,801 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 07:37:28] "OPTIONS /properties HTTP/1.1" 200 -
+2025-04-26 07:37:28,799 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 07:37:28] "OPTIONS /analytics/track HTTP/1.1" 200 -
+2025-04-26 07:37:29,089 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 07:37:29] "GET /properties HTTP/1.1" 200 -
+2025-04-26 07:37:29,092 - housing_navigator - INFO - Analytics event: {'event_type': 'page_view', 'event_data': {'page': 'housing_navigator'}, 'user_id': None, 'timestamp': '2025-04-26T11:37:28.722Z'}
+2025-04-26 07:37:29,093 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 07:37:29] "POST /analytics/track HTTP/1.1" 200 -
+2025-04-26 07:37:32,744 - housing_navigator - INFO - Analytics event: {'event_type': 'page_view', 'event_data': {'page': 'housing_navigator'}, 'user_id': None, 'timestamp': '2025-04-26T11:37:32.739Z'}
+2025-04-26 07:37:32,745 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 07:37:32] "POST /analytics/track HTTP/1.1" 200 -
+2025-04-26 07:37:32,769 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 07:37:32] "GET /properties HTTP/1.1" 200 -
+2025-04-26 15:54:02,404 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/Housing_Navigator_Data_Collection/models.py', reloading
+2025-04-26 15:54:03,442 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 15:54:07,010 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 15:54:07,033 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 15:57:14,397 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/Housing_Navigator_Data_Collection/models.py', reloading
+2025-04-26 15:57:15,621 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 15:57:19,490 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 15:57:19,553 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:19:44,061 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/Mystery_Stays/settings.py', reloading
+2025-04-26 16:19:44,559 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:19:47,840 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:19:47,862 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:20:06,088 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/models.py', reloading
+2025-04-26 16:20:06,375 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:20:10,374 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:20:10,393 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:20:30,750 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/admin.py', reloading
+2025-04-26 16:20:30,996 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:20:32,997 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:20:33,016 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:21:34,380 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/serializers.py', reloading
+2025-04-26 16:21:34,962 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:21:38,578 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:21:38,595 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:21:45,283 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/views.py', reloading
+2025-04-26 16:21:45,621 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:21:48,624 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:21:48,638 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:22:36,447 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/urls.py', reloading
+2025-04-26 16:22:37,220 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:22:40,381 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:22:40,412 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:22:57,018 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/Mystery_Stays/urls.py', reloading
+2025-04-26 16:22:57,300 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:23:00,546 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:23:00,570 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:24:35,521 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/scraper/zillow.py', reloading
+2025-04-26 16:24:36,109 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:24:40,947 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:24:40,967 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:39:46,745 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/scraper/zillow.py', reloading
+2025-04-26 16:39:51,847 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:40:01,727 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:40:01,874 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:40:30,673 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/scraper/apartments.py', reloading
+2025-04-26 16:40:32,591 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:40:45,610 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:40:45,684 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:41:56,653 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/scraper/utils.py', reloading
+2025-04-26 16:41:58,809 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:42:12,316 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:42:12,379 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:57:59,098 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/management/commands/run_scrapers.py', reloading
+2025-04-26 16:58:00,174 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:58:03,527 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:58:03,545 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:58:14,356 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/management/__initi__.py', reloading
+2025-04-26 16:58:14,668 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:58:16,403 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:58:16,415 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 16:59:05,449 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/tests.py', reloading
+2025-04-26 16:59:05,741 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 16:59:09,263 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 16:59:09,279 - werkzeug - INFO -  * Debugger PIN: 132-352-854
+2025-04-26 17:10:06,608 - werkzeug - INFO -  * Detected change in '/Users/somtonweke/Desktop/Mystery_Stays/listings/scrapers.py', reloading
+2025-04-26 17:10:07,275 - werkzeug - INFO -  * Restarting with stat
+2025-04-26 17:10:10,253 - werkzeug - WARNING -  * Debugger is active!
+2025-04-26 17:10:10,276 - werkzeug - INFO -  * Debugger PIN: 132-352-854
