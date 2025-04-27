@@ -14,3 +14,6 @@
 2025-04-26 16:00:40,951 - apscheduler.executors.default - WARNING - Run time of job "scrape_all_sources (trigger: cron[hour='2', minute='0'], next run at: 2025-04-27 02:00:00 EDT)" was missed by 1 day, 14:00:40.951046
 2025-04-26 16:00:40,951 - apscheduler.executors.default - WARNING - Run time of job "scrape_all_sources (trigger: cron[hour='2', minute='0'], next run at: 2025-04-27 02:00:00 EDT)" was missed by 14:00:40.951342
 2025-04-26 16:49:34,700 - apscheduler.executors.default - WARNING - Run time of job "scrape_all_sources (trigger: interval[6:00:00], next run at: 2025-04-26 22:49:15 EDT)" was missed by 0:00:18.794489
+2025-04-27 07:57:10,334 - apscheduler.executors.default - WARNING - Run time of job "scrape_all_sources (trigger: interval[6:00:00], next run at: 2025-04-27 10:49:15 EDT)" was missed by 9:07:54.431391
+2025-04-27 07:57:10,343 - apscheduler.executors.default - WARNING - Run time of job "scrape_all_sources (trigger: interval[6:00:00], next run at: 2025-04-27 10:49:15 EDT)" was missed by 3:07:54.441486
+2025-04-27 07:57:10,374 - apscheduler.executors.default - WARNING - Run time of job "scrape_all_sources (trigger: cron[hour='2', minute='0'], next run at: 2025-04-28 02:00:00 EDT)" was missed by 5:57:10.373425

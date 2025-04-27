@@ -1,948 +1,168 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Housing Navigator - Find Voucher-Friendly Apartments</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-        }
-        header {
-            text-align: center;
-            padding: 20px 0;
-            border-bottom: 1px solid #eee;
-            margin-bottom: 30px;
-        }
-        h1 {
-            color: #2c3e50;
-        }
-        .search-container {
-            background: #f9f9f9;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            margin-right: 15px;
-        }
-        .checkbox-item input {
-            width: auto;
-            margin-right: 5px;
-        }
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-        button:hover {
-            background: #2980b9;
-        }
-        .results-container {
-            margin-top: 30px;
-        }
-        .loading {
-            text-align: center;
-            display: none;
-        }
-        .loading img {
-            width: 50px;
-        }
-        .property-card {
-            border: 1px solid #eee;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .property-card:hover {
-            background-color: #f5f5f5;
-        }
-        .property-info {
-            flex: 1;
-        }
-        .property-details {
-            text-align: right;
-            min-width: 150px;
-        }
-        .voucher-badge {
-            background: #27ae60;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            margin-right: 5px;
-            display: inline-block;
-            margin-bottom: 5px;
-        }
-        .subway-line {
-            background: #3498db;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            margin-right: 5px;
-            font-size: 0.8em;
-        }
-        .no-results {
-            text-align: center;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 5px;
-            display: none;
-        }
-        .property-info a, .property-details a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        .property-info a:hover, .property-details a:hover {
-            text-decoration: underline;
-        }
-        .user-controls {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .user-controls button {
-            width: auto;
-            margin-left: 10px;
-        }
-        .saved-properties-btn {
-            background: #2ecc71;
-        }
-        .saved-properties-btn:hover {
-            background: #27ae60;
-        }
-        .login-container {
-            text-align: right;
-        }
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        .tab {
-            padding: 10px 20px;
-            background: #f1f1f1;
-            border: none;
-            cursor: pointer;
-            margin-right: 5px;
-            border-radius: 4px 4px 0 0;
-        }
-        .tab.active {
-            background: #3498db;
-            color: white;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .pagination button {
-            width: auto;
-            margin: 0 5px;
-            padding: 8px 15px;
-        }
-        .relevance-score {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 100;
-            overflow: auto;
-        }
-        .modal-content {
-            background: white;
-            margin: 10% auto;
-            padding: 20px;
-            width: 60%;
-            border-radius: 8px;
-            max-width: 500px;
-        }
-        .close-modal {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close-modal:hover {
-            color: #000;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Housing Navigator Assistant</h1>
-        <p>Find apartments in NYC that accept housing vouchers</p>
-    </header>
+{% extends "base.html" %}
 
-    <div class="user-controls">
-        <div class="tabs">
-            <button class="tab active" data-tab="search">Search</button>
-            <button class="tab" data-tab="recommended">Recommended</button>
-        </div>
-        <div class="login-container">
-            <button id="login-btn">Login / Register</button>
-            <button class="saved-properties-btn" id="saved-properties-btn" style="display: none;">Saved Properties</button>
-        </div>
-    </div>
+{% block title %}Mystery Stays - Find Your Next Adventure{% endblock %}
 
-    <div id="search-tab" class="tab-content">
-        <div class="search-container">
-            <form id="search-form">
-                <div class="form-group">
-                    <label for="neighborhood">Neighborhood</label>
-                    <select id="neighborhood">
-                        <option value="All NYC">All NYC</option>
-                        <option value="Astoria">Astoria</option>
-                        <option value="Bedford-Stuyvesant">Bedford-Stuyvesant</option>
-                        <option value="Bushwick">Bushwick</option>
-                        <option value="Crown Heights">Crown Heights</option>
-                        <option value="East Harlem">East Harlem</option>
-                        <option value="Flatbush">Flatbush</option>
-                        <option value="Washington Heights">Washington Heights</option>
-                        <option value="South Bronx">South Bronx</option>
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-white py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-6 gradient-text">
+            Discover Unexpected Adventures
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
+            Experience the thrill of mystery travel. Book a surprise getaway and let us handle the details. All you need to do is pack and enjoy!
+        </p>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 md:p-8 max-w-4xl mx-auto">
+            <form action="{{ url_for('search') }}" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-2">
+                    <label for="budget" class="block text-sm font-medium text-gray-700">Budget Range</label>
+                    <select name="budget" id="budget" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                        <option value="">Select budget</option>
+                        <option value="budget">Budget ($100-$300)</option>
+                        <option value="standard">Standard ($300-$700)</option>
+                        <option value="luxury">Luxury ($700+)</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="bedrooms">Bedrooms</label>
-                    <select id="bedrooms">
-                        <option value="Any">Any</option>
-                        <option value="1">1 Bedroom</option>
-                        <option value="2">2 Bedrooms</option>
-                        <option value="3">3+ Bedrooms</option>
+                
+                <div class="space-y-2">
+                    <label for="travelers" class="block text-sm font-medium text-gray-700">Number of Travelers</label>
+                    <select name="travelers" id="travelers" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                        <option value="">Select travelers</option>
+                        <option value="1">Solo Traveler</option>
+                        <option value="2">Couple</option>
+                        <option value="3-5">Family (3-5)</option>
+                        <option value="6+">Group (6+)</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="max-rent">Maximum Monthly Rent</label>
-                    <input type="range" id="max-rent" min="1000" max="3000" step="100" value="2000">
-                    <div id="max-rent-display">$2,000</div>
+
+                <div class="space-y-2">
+                    <label for="dates" class="block text-sm font-medium text-gray-700">Travel Dates</label>
+                    <input type="text" name="dates" id="dates" placeholder="Select dates" 
+                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                           x-data 
+                           x-init="flatpickr($el, {mode: 'range', dateFormat: 'Y-m-d'})">
                 </div>
-                <div class="form-group">
-                    <label>Voucher Types</label>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="section8" name="voucher_types" value="Section 8" checked>
-                            <label for="section8">Section 8</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="cityfheps" name="voucher_types" value="CityFHEPS" checked>
-                            <label for="cityfheps">CityFHEPS</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="fheps" name="voucher_types" value="FHEPS">
-                            <label for="fheps">FHEPS</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="hasa" name="voucher_types" value="HASA">
-                            <label for="hasa">HASA</label>
-                        </div>
-                    </div>
+                
+                <div class="md:col-span-3">
+                    <button type="submit" class="w-full md:w-auto px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-primary-hover transition-colors">
+                        Find Mystery Stays
+                    </button>
                 </div>
-                <button type="submit" id="search-button">Find Housing</button>
             </form>
         </div>
     </div>
+</section>
 
-    <div id="recommended-tab" class="tab-content" style="display: none;">
-        <div class="search-container">
-            <h2>Personalized Recommendations</h2>
-            <p>Based on your preferences and search history, we recommend these properties:</p>
-            <button id="get-recommendations-btn">Get Recommendations</button>
-            <p id="search-limit" style="display: none;">Remaining searches today: <span id="remaining-searches">10</span></p>
+<!-- How It Works -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center mb-12">How Mystery Stays Works</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white rounded-xl p-8 text-center">
+                <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">Tell Us Your Preferences</h3>
+                <p class="text-gray-600">Share your budget, dates, and travel style. That's all we need to start planning your mystery adventure.</p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-8 text-center">
+                <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                        <line x1="8" y1="2" x2="8" y2="18"></line>
+                        <line x1="16" y1="6" x2="16" y2="22"></line>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">We Plan Everything</h3>
+                <p class="text-gray-600">Our expert travel team handles all the details - from accommodations to activities, creating a personalized adventure.</p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-8 text-center">
+                <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                        <rect x="2" y="7" width="20" height="5"></rect>
+                        <line x1="12" y1="22" x2="12" y2="7"></line>
+                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">Reveal Your Destination</h3>
+                <p class="text-gray-600">Discover your mystery destination just before departure. All you need to do is pack your sense of adventure!</p>
+            </div>
         </div>
     </div>
+</section>
 
-    <div class="loading">
-        <p>Scanning for voucher-friendly housing...</p>
-        <img src="/api/placeholder/50/50" alt="Loading">
-    </div>
-
-    <div class="no-results">
-        <h3>No voucher-friendly apartments found</h3>
-        <p>Try different filters or another neighborhood</p>
-    </div>
-
-    <div class="results-container" id="results"></div>
-
-    <div class="pagination" id="pagination" style="display: none;">
-        <button id="prev-page" disabled>Previous</button>
-        <span id="page-info">Page 1 of 1</span>
-        <button id="next-page">Next</button>
-    </div>
-
-    <!-- Login/Register Modal -->
-    <div id="auth-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2 id="modal-title">Login</h2>
-            <form id="auth-form">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" required>
+<!-- Featured Destinations -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center mb-12">Popular Mystery Destinations</h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for category in categories %}
+                <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <img src="{{ category.image_url }}" alt="{{ category.name }}" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">{{ category.name }}</h3>
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            {{ category.location_type }}
+                        </div>
+                        <p class="text-gray-600 mb-4">{{ category.description }}</p>
+                        <p class="text-primary font-bold">From ${{ category.starting_price }}</p>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required>
-                </div>
-                <div class="form-group" id="name-field" style="display: none;">
-                    <label for="name">Name</label>
-                    <input type="text" id="name">
-                </div>
-                <button type="submit" id="auth-submit">Login</button>
-            </form>
-            <p id="auth-toggle">Don't have an account? <a href="#" id="toggle-auth">Register</a></p>
-            <p id="auth-message" style="color: red;"></p>
+            {% endfor %}
         </div>
     </div>
+</section>
 
-    <!-- Saved Properties Modal -->
-    <div id="saved-properties-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>Your Saved Properties</h2>
-            <div id="saved-properties-list"></div>
-        </div>
-    </div>
-
-    <script>
-        // Global variables
-        let currentUser = null;
-        let currentPage = 1;
-        let totalPages = 1;
-        let propertiesPerPage = 10;
-        let currentTab = 'search';
-
-        // Update the displayed max rent value when slider changes
-        document.getElementById('max-rent').addEventListener('input', function() {
-            document.getElementById('max-rent-display').textContent = '$' + this.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        });
-
-        // Tab switching functionality
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                const tabName = this.getAttribute('data-tab');
-                
-                // Update active tab
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Show only the active tab content
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.style.display = 'none';
-                });
-                document.getElementById(tabName + '-tab').style.display = 'block';
-                
-                currentTab = tabName;
-                
-                // Clear results when switching tabs
-                document.getElementById('results').innerHTML = '';
-                document.querySelector('.no-results').style.display = 'none';
-                document.getElementById('pagination').style.display = 'none';
-            });
-        });
-
-        // Login/Register Modal Functionality
-        document.getElementById('login-btn').addEventListener('click', function() {
-            document.getElementById('auth-modal').style.display = 'block';
-        });
-
-        document.querySelectorAll('.close-modal').forEach(closeBtn => {
-            closeBtn.addEventListener('click', function() {
-                this.closest('.modal').style.display = 'none';
-            });
-        });
-
-        // Toggle between login and register
-        document.getElementById('toggle-auth').addEventListener('click', function(e) {
-            e.preventDefault();
-            const isLogin = document.getElementById('modal-title').textContent === 'Login';
-            
-            document.getElementById('modal-title').textContent = isLogin ? 'Register' : 'Login';
-            document.getElementById('auth-submit').textContent = isLogin ? 'Register' : 'Login';
-            document.getElementById('name-field').style.display = isLogin ? 'block' : 'none';
-            document.getElementById('auth-toggle').innerHTML = isLogin ? 
-                'Already have an account? <a href="#" id="toggle-auth">Login</a>' : 
-                'Don\'t have an account? <a href="#" id="toggle-auth">Register</a>';
-            
-            // Re-attach event listener to the new toggle link
-            document.getElementById('toggle-auth').addEventListener('click', arguments.callee);
-        });
-
-        // Handle auth form submission
-        document.getElementById('auth-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const isLogin = document.getElementById('modal-title').textContent === 'Login';
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            if (isLogin) {
-                // This is a simplified login - in a real app you'd have a proper login endpoint
-                try {
-                    // Simulate login success for demo purposes
-                    currentUser = {
-                        id: 'user123', // In a real app, this would come from the server
-                        email: email,
-                        name: 'Demo User'
-                    };
-                    
-                    updateUIForLoggedInUser();
-                    document.getElementById('auth-modal').style.display = 'none';
-                } catch (error) {
-                    document.getElementById('auth-message').textContent = 'Login failed. Please try again.';
-                }
-            } else {
-                // Register new user
-                const name = document.getElementById('name').value;
-                
-                try {
-                    const response = await fetch('http://127.0.0.1:5000/auth/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            email: email,
-                            password: password,
-                            name: name
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.status === 'success') {
-                        currentUser = {
-                            id: data.user_id,
-                            email: email,
-                            name: name
-                        };
-                        
-                        updateUIForLoggedInUser();
-                        document.getElementById('auth-modal').style.display = 'none';
-                    } else {
-                        document.getElementById('auth-message').textContent = data.message || 'Registration failed.';
-                    }
-                } catch (error) {
-                    document.getElementById('auth-message').textContent = 'Registration failed. Please try again.';
-                }
-            }
-        });
-
-        // Update UI elements when user is logged in
-        function updateUIForLoggedInUser() {
-            document.getElementById('login-btn').textContent = 'Logout (' + currentUser.name + ')';
-            document.getElementById('saved-properties-btn').style.display = 'inline-block';
-            
-            // Update login button to handle logout
-            document.getElementById('login-btn').removeEventListener('click', null);
-            document.getElementById('login-btn').addEventListener('click', function() {
-                currentUser = null;
-                document.getElementById('login-btn').textContent = 'Login / Register';
-                document.getElementById('saved-properties-btn').style.display = 'none';
-                
-                // Reset login button to open modal
-                document.getElementById('login-btn').removeEventListener('click', null);
-                document.getElementById('login-btn').addEventListener('click', function() {
-                    document.getElementById('auth-modal').style.display = 'block';
-                });
-            });
-        }
-
-        // Handle saved properties button
-        document.getElementById('saved-properties-btn').addEventListener('click', async function() {
-            if (!currentUser) {
-                document.getElementById('auth-modal').style.display = 'block';
-                return;
-            }
-            
-            try {
-                const response = await fetch(`http://127.0.0.1:5000/user/saved_properties?user_id=${currentUser.id}`);
-                const data = await response.json();
-                
-                if (data.status === 'success') {
-                    displaySavedProperties(data.saved_properties);
-                } else {
-                    alert('Error loading saved properties');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error loading saved properties');
-            }
-        });
-
-        // Display saved properties in modal
-        function displaySavedProperties(properties) {
-            const savedPropertiesList = document.getElementById('saved-properties-list');
-            savedPropertiesList.innerHTML = '';
-            
-            if (properties.length === 0) {
-                savedPropertiesList.innerHTML = '<p>You haven\'t saved any properties yet.</p>';
-            } else {
-                properties.forEach(property => {
-                    const propertyItem = document.createElement('div');
-                    propertyItem.className = 'property-card';
-                    
-                    // Generate voucher badges HTML
-                    const voucherBadges = property.accepted_vouchers 
-                        ? property.accepted_vouchers.map(voucher => 
-                            `<span class="voucher-badge">${voucher}</span>`
-                        ).join('') 
-                        : '';
-                    
-                    propertyItem.innerHTML = `
-                        <div class="property-info">
-                            <h3>${property.title}</h3>
-                            <p>${property.address}</p>
-                            <p>${property.bedrooms} BR | ${property.neighborhood}</p>
-                            <div>${voucherBadges}</div>
-                        </div>
-                        <div class="property-details">
-                            <p><strong>$${property.rent}/month</strong></p>
-                            <p>Landlord: ${property.landlord}</p>
-                        </div>
-                    `;
-                    
-                    savedPropertiesList.appendChild(propertyItem);
-                });
-            }
-            
-            document.getElementById('saved-properties-modal').style.display = 'block';
-        }
-
-        // Handle getting recommendations
-        document.getElementById('get-recommendations-btn').addEventListener('click', async function() {
-            if (!currentUser) {
-                document.getElementById('auth-modal').style.display = 'block';
-                return;
-            }
-            
-            // Show loading
-            document.querySelector('.loading').style.display = 'block';
-            document.querySelector('.no-results').style.display = 'none';
-            document.getElementById('results').innerHTML = '';
-            
-            try {
-                const response = await fetch(`http://127.0.0.1:5000/properties/recommended?user_id=${currentUser.id}&limit=10`);
-                const data = await response.json();
-                
-                // Hide loading
-                document.querySelector('.loading').style.display = 'none';
-                
-                if (data.status === 'success' && data.properties && data.properties.length > 0) {
-                    displayResults(data.properties, true);
-                    
-                    // Update remaining searches display
-                    if (data.remaining_searches !== null) {
-                        document.getElementById('remaining-searches').textContent = data.remaining_searches;
-                        document.getElementById('search-limit').style.display = 'block';
-                    } else {
-                        document.getElementById('search-limit').style.display = 'none';
-                    }
-                } else if (data.status === 'limit_reached') {
-                    alert('You\'ve reached your daily search limit. Upgrade to premium for unlimited searches.');
-                } else {
-                    document.querySelector('.no-results').style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                document.querySelector('.loading').style.display = 'none';
-                document.querySelector('.no-results').style.display = 'block';
-                document.querySelector('.no-results h3').textContent = 'Error getting recommendations';
-                document.querySelector('.no-results p').textContent = 'Please try again later';
-            }
-        });
-
-        // Handle property search form submission
-        document.getElementById('search-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const neighborhood = document.getElementById('neighborhood').value;
-            const bedrooms = document.getElementById('bedrooms').value;
-            const maxRent = parseInt(document.getElementById('max-rent').value);
-            
-            // Get selected voucher types
-            const voucherCheckboxes = document.querySelectorAll('input[name="voucher_types"]:checked');
-            const voucherTypes = Array.from(voucherCheckboxes).map(checkbox => checkbox.value);
-            
-            // Show loading
-            document.querySelector('.loading').style.display = 'block';
-            document.querySelector('.no-results').style.display = 'none';
-            document.getElementById('results').innerHTML = '';
-            
-            try {
-                // Updated endpoint to match our Flask implementation
-                const response = await fetch('http://127.0.0.1:5000/properties', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                
-                // Hide loading
-                document.querySelector('.loading').style.display = 'none';
-                
-                if (data.status === 'success' && data.properties && data.properties.length > 0) {
-                    // Update pagination info
-                    totalPages = data.total_pages || 1;
-                    currentPage = data.page || 1;
-                    updatePagination();
-                    
-                    displayResults(data.properties);
-                } else {
-                    document.querySelector('.no-results').style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                document.querySelector('.loading').style.display = 'none';
-                document.querySelector('.no-results').style.display = 'block';
-                document.querySelector('.no-results h3').textContent = 'Error scanning listings';
-                document.querySelector('.no-results p').textContent = 'Please try again later';
-            }
-        });
-
-        // Display search results
-        function displayResults(properties, isRecommended = false) {
-            const resultsContainer = document.getElementById('results');
-            resultsContainer.innerHTML = '';
-            
-            properties.forEach(property => {
-                const propertyCard = document.createElement('div');
-                propertyCard.className = 'property-card';
-                
-                // Generate voucher badges HTML
-                const voucherBadges = property.accepted_vouchers 
-                    ? property.accepted_vouchers.map(voucher => 
-                        `<span class="voucher-badge">${voucher}</span>`
-                    ).join('') 
-                    : '';
-                
-                // Generate subway line icons if available
-                let subwayLines = '';
-                if (property.subway_lines) {
-                    subwayLines = property.subway_lines.map(line => 
-                        `<span class="subway-line">${line}</span>`
-                    ).join('');
-                }
-                
-                // Create external URLs based on the listing source
-                let externalUrl = "#";
-                if (property.listing_source === "NYC Housing Connect") {
-                    externalUrl = "https://housingconnect.nyc.gov/PublicWeb/search-rentals";
-                } else if (property.listing_source === "GoSection8") {
-                    externalUrl = "https://www.gosection8.com/Section-8-housing-in-New-York-NY/";
-                } else if (property.listing_source === "StreetEasy") {
-                    externalUrl = "https://streeteasy.com/for-rent/nyc/status:open";
-                }
-                
-                // Recommendation score display
-                let scoreDisplay = '';
-                if (isRecommended && property.relevance_score) {
-                    scoreDisplay = `<p class="relevance-score">Match: ${Math.round(property.relevance_score)}%</p>`;
-                }
-                
-                propertyCard.innerHTML = `
-                    <div class="property-info">
-                        <h3><a href="#" class="property-detail-link" data-id="${property.id}">${property.title}</a></h3>
-                        <p>${property.address}</p>
-                        <p>${property.bedrooms} BR | Available: ${property.available_date ? formatDate(property.available_date) : 'Now'}</p>
-                        <div>
-                            ${voucherBadges}
-                        </div>
-                        <div>
-                            ${subwayLines}
+<!-- Testimonials -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center mb-12">What Our Adventurers Say</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {% for testimonial in testimonials %}
+                <div class="bg-white p-6 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <img src="{{ testimonial.avatar_url }}" alt="{{ testimonial.name }}" class="w-12 h-12 rounded-full object-cover">
+                        <div class="ml-4">
+                            <h4 class="font-semibold">{{ testimonial.name }}</h4>
+                            <p class="text-sm text-gray-500">{{ testimonial.destination }}</p>
                         </div>
                     </div>
-                    <div class="property-details">
-                        <p><strong>$${property.rent}/month</strong></p>
-                        <p>Landlord: ${property.landlord}</p>
-                        <p>Source: <a href="${externalUrl}" target="_blank">${property.listing_source}</a></p>
-                        ${scoreDisplay}
-                        ${currentUser ? `<button class="save-property-btn" data-id="${property.id}">Save</button>` : ''}
-                    </div>
-                `;
-                
-                resultsContainer.appendChild(propertyCard);
-            });
-            
-            // Add event listeners to save buttons
-            if (currentUser) {
-                document.querySelectorAll('.save-property-btn').forEach(btn => {
-                    btn.addEventListener('click', async function(e) {
-                        e.stopPropagation();
-                        const propertyId = this.getAttribute('data-id');
-                        
-                        try {
-                            const response = await fetch('http://127.0.0.1:5000/user/saved_properties', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    user_id: currentUser.id,
-                                    property_id: propertyId
-                                })
-                            });
-                            
-                            const data = await response.json();
-                            
-                            if (data.status === 'success') {
-                                this.textContent = 'Saved';
-                                this.disabled = true;
-                                this.style.background = '#95a5a6';
-                            } else {
-                                alert('Error saving property');
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            alert('Error saving property');
-                        }
-                    });
-                });
-            }
-            
-            // Add event listeners to property detail links
-            document.querySelectorAll('.property-detail-link').forEach(link => {
-                link.addEventListener('click', async function(e) {
-                    e.preventDefault();
-                    const propertyId = this.getAttribute('data-id');
-                    viewPropertyDetails(propertyId);
-                });
-            });
-            
-            // Show pagination if needed
-            document.getElementById('pagination').style.display = totalPages > 1 ? 'flex' : 'none';
-        }
+                    <p class="text-gray-600 italic">{{ testimonial.content }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 
-        // View property details
-        async function viewPropertyDetails(propertyId) {
-            try {
-                const response = await fetch(`http://127.0.0.1:5000/properties/${propertyId}`);
-                const data = await response.json();
-                
-                if (data.status === 'success') {
-                    // In a real app, show a modal with detailed property info
-                    alert(`Property details for: ${data.property.title}\n\nAddress: ${data.property.address}\nRent: $${data.property.rent}\nBedrooms: ${data.property.bedrooms}\nBathrooms: ${data.property.bathrooms}\n\nDescription: ${data.property.description}`);
-                } else {
-                    alert('Error loading property details');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error loading property details');
-            }
-        }
-
-        // Update pagination controls
-        function updatePagination() {
-            document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
-            document.getElementById('prev-page').disabled = currentPage === 1;
-            document.getElementById('next-page').disabled = currentPage === totalPages;
-        }
-
-        // Pagination event listeners
-        document.getElementById('prev-page').addEventListener('click', function() {
-            if (currentPage > 1) {
-                currentPage--;
-                loadPageResults();
-            }
-        });
-
-        document.getElementById('next-page').addEventListener('click', function() {
-            if (currentPage < totalPages) {
-                currentPage++;
-                loadPageResults();
-            }
-        });
-
-        // Load results for current page
-        async function loadPageResults() {
-            // Show loading
-            document.querySelector('.loading').style.display = 'block';
-            document.getElementById('results').innerHTML = '';
-            
-            try {
-                const neighborhood = document.getElementById('neighborhood').value;
-                const bedrooms = document.getElementById('bedrooms').value;
-                const maxRent = parseInt(document.getElementById('max-rent').value);
-                
-                // Get selected voucher types 
-
-                // Get selected voucher types
-const voucherCheckboxes = document.querySelectorAll('input[name="voucher_types"]:checked');
-const voucherTypes = Array.from(voucherCheckboxes).map(checkbox => checkbox.value);
-
-const response = await fetch(`http://127.0.0.1:5000/properties?neighborhood=${encodeURIComponent(neighborhood)}&bedrooms=${bedrooms}&max_rent=${maxRent}&voucher_types=${voucherTypes.join(',')}&page=${currentPage}&per_page=${propertiesPerPage}`);
-                
-const data = await response.json();
-                
-// Hide loading
-document.querySelector('.loading').style.display = 'none';
-                
-if (data.status === 'success' && data.properties && data.properties.length > 0) {
-    // Update pagination info
-    totalPages = data.total_pages || 1;
-    currentPage = data.page || 1;
-    updatePagination();
-                    
-    displayResults(data.properties);
-} else {
-    document.querySelector('.no-results').style.display = 'block';
-}
-} catch (error) {
-    console.error('Error:', error);
-    document.querySelector('.loading').style.display = 'none';
-    document.querySelector('.no-results').style.display = 'block';
-    document.querySelector('.no-results h3').textContent = 'Error loading results';
-    document.querySelector('.no-results p').textContent = 'Please try again later';
-}
-}
-
-// Helper function to format dates
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-// Initialize event listeners and UI state on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is already logged in (e.g., from localStorage in a real app)
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-        try {
-            currentUser = JSON.parse(savedUser);
-            updateUIForLoggedInUser();
-        } catch (e) {
-            localStorage.removeItem('currentUser');
-        }
-    }
+<!-- CTA Section -->
+<section class="py-16 md:py-24 bg-gradient-to-r from-primary to-secondary text-white">
     
-    // Initial search to populate results
-    document.getElementById('search-button').click();
-    
-    // Close modals when clicking outside of content
-    window.addEventListener('click', function(event) {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-    });
-});
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready for Your Mystery Adventure?</h2>
+        <p class="text-xl opacity-90 mb-8">Join thousands of travelers who've discovered unexpected destinations and created unforgettable memories.</p>
+        <a href="{{ url_for('book_now') }}" class="inline-block px-8 py-3 bg-white text-primary font-medium rounded-md hover:bg-gray-100 transition-colors">
+            Book Your Mystery Stay Now
+        </a>
+    </div>
+</section>
+{% endblock %}
 
-// Save user to localStorage when logged in
-function saveUserToLocalStorage() {
-    if (currentUser) {
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    } else {
-        localStorage.removeItem('currentUser');
-    }
-}
-
-// Function to handle property contact request
-async function contactLandlord(propertyId) {
-    if (!currentUser) {
-        document.getElementById('auth-modal').style.display = 'block';
-        return;
-    }
-    
-    try {
-        const response = await fetch('http://127.0.0.1:5000/properties/contact', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                user_id: currentUser.id,
-                property_id: propertyId
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-            alert('Contact request sent successfully! The landlord will contact you soon.');
-        } else {
-            alert('Error sending contact request: ' + (data.message || 'Please try again later.'));
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error sending contact request. Please try again later.');
-    }
-}
-
-// Function to track analytics
-function trackEvent(eventType, eventData) {
-    // In a real app, this would send data to an analytics service
-    console.log('ANALYTICS:', eventType, eventData);
-    
-    // Example implementation with fetch
-    fetch('http://127.0.0.1:5000/analytics/track', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            event_type: eventType,
-            event_data: eventData,
-            user_id: currentUser ? currentUser.id : null,
-            timestamp: new Date().toISOString()
-        })
-    }).catch(err => console.error('Analytics error:', err));
-}
-
-// Track page views
-trackEvent('page_view', { page: 'housing_navigator' });
-</script>
-</body>
-</html>
+{% block scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{% endblock %}

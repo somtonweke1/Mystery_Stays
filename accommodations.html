@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block title %}Mystery Stays - Browse Accommodations{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-4xl font-bold mb-6 gradient-text text-center">Discover Our Mystery Accommodations</h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto text-center mb-8">
+            Browse through our categories of mystery stays. Remember, the exact location remains a surprise until your booking is confirmed!
+        </p>
+    </div>
+</section>
+
+<!-- Filters -->
+<section class="bg-gray-50 py-6 border-t border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <form 
+            id="filter-form" 
+            hx-get="{{ url_for('accommodations') }}" 
+            hx-target="#accommodations-grid" 
+            hx-trigger="change"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            
+            <div>
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select name="category" id="category" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                    <option value="">All Categories</option>
+                    <option value="beach" {% if request.args.get('category') == 'beach' %}selected{% endif %}>Beach Escapes</option>
+                    <option value="city" {% if request.args.get('category') == 'city' %}selected{% endif %}>Urban Adventures</option>
+                    <option value="mountain" {% if request.args.get('category') == 'mountain' %}selected{% endif %}>Mountain Retreats</option>
+                    <option value="countryside" {% if request.args.get('category') == 'countryside' %}selected{% endif %}>Countryside Getaways</option>
+                    <option value="international" {% if request.args.get('category') == 'international' %}selected{% endif %}>International Mysteries</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="budget" class="block text-sm font-medium text-gray-700 mb-1">Budget</label>
+                <select name="budget" id="budget" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                    <option value="">Any Budget</option>
+                    <option value="budget" {% if request.args.get('budget') == 'budget' %}selected{% endif %}>Budget ($100-$300)</option>
+                    <option value="standard" {% if request.args.get('budget') == 'standard' %}selected{% endif %}>Standard ($300-$700)</option>
+                    <option value="luxury" {% if request.args.get('budget') == 'luxury' %}selected{% endif %}>Luxury ($700+)</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="rating" class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                <select name="rating" id="rating" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                    <option value="">Any Rating</option>
+                    <option value="5" {% if request.args.get('rating') == '5' %}selected{% endif %}>5 Stars</option>
+                    <option value="4" {% if request.args.get('rating') == '4' %}selected{% endif %}>4+ Stars</option>
+                    <option value="3" {% if request.args.get('rating') == '3' %}selected{% endif %}>3+ Stars</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                <select name="sort" id="sort" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                    <option value="recommended" {% if request.args.get('sort') == 'recommended' %}selected{% endif %}>Recommended</option>
+                    <option value="price_low" {% if request.args.get('sort') == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_high" {% if request.args.get('sort') == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="rating" {% if request.args.get('sort') == 'rating' %}selected{% endif %}>Highest Rating</option>
+                </select>
+            </div>
+            
+            <div class="sm:col-span-2 lg:col-span-1">
+                <button type="submit" class="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors">
+                    Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Accommodations Grid -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div id="accommodations-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for accommodation in accommodations %}
+                <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div class="relative">
+                        <img src="{{ accommodation.image_url }}" alt="{{ accommodation.name }}" class="w-full h-56 object-cover">
+                        <div class="absolute top-4 right-4 bg-white py-1 px-3 rounded-full text-sm font-medium text-primary">
+                            {{ accommodation.category_name }}
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-amber-500 mb-2">
+                            {% for i in range(1, 6) %}
+                                {% if i <= accommodation.rating %}
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                {% else %}
+                                    <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ml-2 text-gray-600 text-sm">({{ accommodation.review_count }} reviews)</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">{{ accommodation.name }}</h3>
+                        <div 
+                            x-data="{ showFull: false }" 
+                            class="mb-4">
+                            <p class="text-gray-600" x-show="!showFull">{{ accommodation.description[:100] }}{% if accommodation.description|length > 100 %}...{% endif %}</p>
+                            <p class="text-gray-600" x-show="showFull">{{ accommodation.description }}</p>
+                            {% if accommodation.description|length > 100 %}
+                                <button 
+                                    @click="showFull = !showFull" 
+                                    class="text-primary text-sm font-medium mt-1 focus:outline-none"
+                                    x-text="showFull ? 'Show less' : 'Read more'">
+                                    Read more
+                                </button>
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Price from</p>
+                                <p class="text-primary font-bold text-xl">${{ accommodation.price_per_night }}</p>
+                            </div>
+                            <a href="{{ url_for('accommodation_detail', id=accommodation.id) }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+            <div class="mt-12 flex justify-center">
+                <nav class="inline-flex rounded-md shadow">
+                    {% if pagination.has_prev %}
+                        <a href="{{ url_for('accommodations', page=pagination.prev_num, **request.args) }}" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                            Previous
+                        </a>
+                    {% else %}
+                        <span class="px-3 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
+                            Previous
+                        </span>
+                    {% endif %}
+                    
+                    {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num == pagination.page %}
+                                <span class="px-3 py-2 border border-gray-300 bg-primary text-white">
+                                    {{ page_num }}
+                                </span>
+                            {% else %}
+                                <a href="{{ url_for('accommodations', page=page_num, **request.args) }}" class="px-3 py-2 border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                                    {{ page_num }}
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <span class="px-3 py-2 border border-gray-300 bg-white text-gray-500">
+                                …
+                            </span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if pagination.has_next %}
+                        <a href="{{ url_for('accommodations', page=pagination.next_num, **request.args) }}" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                            Next
+                        </a>
+                    {% else %}
+                        <span class="px-3 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
+                            Next
+                        </span>
+                    {% endif %}
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="py-12 bg-gray-50 border-t border-gray-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="bg-white p-8 rounded-xl shadow-sm">
+            <h2 class="text-2xl font-bold mb-4">Get Exclusive Mystery Stay Offers</h2>
+            <p class="text-gray-600 mb-6">Subscribe to our newsletter and receive early access to special deals and seasonal promotions.</p>
+            
+            <form 
+                hx-post="{{ url_for('subscribe_newsletter') }}" 
+                hx-target="#newsletter-result"
+                hx-swap="outerHTML"
+                class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                <input 
+                    type="email" 
+                    name="email" 
+                    required
+                    placeholder="Enter your email" 
+                    class="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:ring focus:ring-primary focus:ring-opacity-50 focus:border-primary">
+                <button type="submit" class="px-6 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary-hover transition-colors whitespace-nowrap">
+                    Subscribe
+                </button>
+            </form>
+            <div id="newsletter-result" class="mt-4"></div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% extends "base.html" %}
+
+{% block title %}{{ accommodation.name }} - Mystery Stays{% endblock %}
+
+{% block content %}
+<!-- Accommodation Detail -->
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-10">
+            <a href="{{ url_for('accommodations') }}" class="flex items-center text-primary hover:underline">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to all accommodations
+            </a>
+        </div>
+        
+        <div class="bg-white rounded-xl overflow-hidden shadow-md">
+            <!-- Image Gallery -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+                <div class="md:col-span-2 h-80">
+                    <img id="mainImage" src="{{ accommodation.images[0] }}" alt="{{ accommodation.name }}" class="w-full h-full object-cover rounded-lg">
+                </div>
+                
+                <div class="grid grid-cols-4 gap-2 md:col-span-2">
+                    {% for image in accommodation.images %}
+                        {% if loop.index0 < 4 %}
+                            <div class="h-20 cursor-pointer hover:opacity-75 transition-opacity" onclick="document.getElementById('mainImage').src='{{ image }}'">
+                                <img src="{{ image }}" alt="{{ accommodation.name }}" class="w-full h-full object-cover rounded-lg">
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 p-6">
+                <!-- Accommodation Info -->
+                <div class="lg:col-span-2">
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <span class="bg-indigo-100 text-primary py-1 px-3 rounded-full text-sm font-medium">
+                            {{ accommodation.category_name }}
+                        </span>
+                        <div class="flex items-center text-amber-500">
+                            {% for i in range(1, 6) %}
+                                {% if i <= accommodation.rating %}
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                {% else %}
+                                    <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ml-2 text-gray-600 text-sm">({{ accommodation.review_count }} reviews)</span>
+                        </div>
+                    </div>
+                    
+                    <h1 class="text-3xl font-bold mb-4">{{ accommodation.name }}</h1>
+                    
+                    <div class="mb-6">
+                        <div class="flex items-center text-gray-600 mb-4">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span>{{ accommodation.location_hint }}</span>
+                        </div>
+                        
+                        <p class="text-gray-700 mb-6">{{ accommodation.description }}</p>
+                        
+                        <!-- Amenities -->
+                        <h2 class="text-xl font-semibold mb-4">Amenities</h2>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                            {% for amenity in accommodation.amenities %}
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>{{ amenity }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Activities -->
+                        <h2 class="text-xl font-semibold mb-4">Nearby Activities</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                            {% for activity in accommodation.activities %}
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                    <span>{{ activity }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Reviews -->
+                        <h2 class="text-xl font-semibold mb-4">Guest Reviews</h2>
+                        <div class="space-y-6">
+                            {% for review in accommodation.reviews %}
+                                <div class="border-b border-gray-200 pb-6 last:border-b-0">
+                                    <div class="flex items-center mb-2">
+                                        <div class="flex items-center text-amber-500">
+                                            {% for i in range(1, 6) %}
+                                                {% if i <= review.rating %}
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                    </svg>
+                                                {% else %}
+                                                    <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                    </svg>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <span class="ml-2 font-medium">{{ review.title }}</span>
+                                    </div>
+                                    <p class="text-gray-600 mb-2">{{ review.content }}</p>
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <span class="font-medium">{{ review.author }}</span>
+                                        <span class="mx-2">•</span>
+                                        <span>{{ review.date }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Booking Card -->
+                <div>
+                    <div class="bg-gray-50 p-6 rounded-xl sticky top-8">
+                        <h2 class="text-xl font-semibold mb-4">Book this Mystery Stay</h2>
+                        <div class="mb-6">
+                            <p class="text-gray-600 mb-1">Price per night</p>
+                            <p class="text-3xl font-bold text-primary">${{ accommodation.price_per_night }}</p>
+                        </div>
+                        
+                        <form 
+                            action="{{ url_for('book_accommodation', id=accommodation.id) }}" 
+                            method="POST"
+                            class="space-y-4">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div>
+                                <label for="dates" class="block text-sm font-medium text-gray-700 mb-1">Select Dates</label>
+                                <input 
+                                    type="text" 
+                                    id="dates" 
+                                    name="dates" 
+                                    required
+                                    placeholder="Check-in — Check-out" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                    x-data 
+                                    x-init="flatpickr($el, {
+                                        mode: 'range',
+                                        minDate: 'today',
+                                        dateFormat: 'Y-m-d',
+                                        disable: {{ accommodation.booked_dates|tojson }},
+                                        onChange: function(selectedDates) {
+                                            if (selectedDates.length === 2) {
+                                                const nights = Math.round((selectedDates[1] - selectedDates[0]) / (24 * 60 * 60 * 1000));
+                                                document.getElementById('nights').textContent = nights;
+                                                document.getElementById('night-label').textContent = nights > 1 ? 'nights' : 'night';
+                                                document.getElementById('subtotal').textContent = '$' + ({{ accommodation.price_per_night }} * nights).toFixed(2);
+                                                document.getElementById('total').textContent = '$' + ({{ accommodation.price_per_night }} * nights * 1.15).toFixed(2);
+                                                document.getElementById('booking-summary').classList.remove('hidden');
+                                            }
+                                        }
+                                    })">
+                            </div>
+                            
+                            <div>
+                                <label for="guests" class="block text-sm font-medium text-gray-700 mb-1">Guests</label>
+                                <select id="guests" name="guests" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                    {% for i in range(1, accommodation.max_guests + 1) %}
