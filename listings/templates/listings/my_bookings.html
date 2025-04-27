@@ -1,0 +1,118 @@
+{% extends "listings/base.html" %}
+
+{% block page_content %}
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <h1 class="text-3xl font-bold mb-8">My Bookings</h1>
+
+    <div class="space-y-6">
+        {% for booking in bookings %}
+            <div class="bg-gray-50 rounded-xl p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="flex-1">
+                        <h2 class="text-xl font-semibold mb-2">{{ booking.property.title }}</h2>
+                        <div class="flex items-center text-gray-600 mb-4">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            {{ booking.property.location.city }}, {{ booking.property.location.state }}
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div>
+                                <span class="block text-gray-500">Check-in</span>
+                                <span class="font-medium">{{ booking.check_in|date:"M j, Y" }}</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-500">Check-out</span>
+                                <span class="font-medium">{{ booking.check_out|date:"M j, Y" }}</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-500">Guests</span>
+                                <span class="font-medium">{{ booking.guests }} guest{{ booking.guests|pluralize }}</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-500">Total Price</span>
+                                <span class="font-medium">${{ booking.total_price }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 md:mt-0 md:ml-6 flex items-center space-x-4">
+                        {% if booking.status == 'CONFIRMED' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                Confirmed
+                            </span>
+                        {% elif booking.status == 'PENDING' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                Pending
+                            </span>
+                        {% elif booking.status == 'CANCELLED' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                Cancelled
+                            </span>
+                        {% endif %}
+                        
+                        {% if booking.status == 'CONFIRMED' %}
+                            <a href="{% url 'property_detail' booking.property.pk %}" class="inline-flex items-center text-primary hover:text-primary-dark">
+                                <span>View Property</span>
+                                <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center py-12">
+                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                <h3 class="text-xl font-medium text-gray-900 mb-2">No bookings yet</h3>
+                <p class="text-gray-500 mb-6">Start exploring properties and book your next stay!</p>
+                <a href="{% url 'property_list' %}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark">
+                    Browse Properties
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if bookings %}
+        <!-- Pagination -->
+        {% if is_paginated %}
+            <div class="mt-8 flex justify-center">
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Previous</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    {% endif %}
+                    
+                    {% for i in paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-primary text-sm font-medium text-white">
+                                {{ i }}
+                            </span>
+                        {% else %}
+                            <a href="?page={{ i }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                {{ i }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Next</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,163 @@
+{% extends "listings/base.html" %}
+
+{% block page_content %}
+<!-- Filters -->
+<div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+    <form hx-get="{% url 'property_list' %}" hx-target="#property-grid" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+            <select name="category" id="category" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                <option value="">All Types</option>
+                {% for type in property_types %}
+                    <option value="{{ type.0 }}" {% if request.GET.category == type.0 %}selected{% endif %}>
+                        {{ type.1 }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div>
+            <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+            <select name="price" id="price" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                <option value="">Any Price</option>
+                <option value="0-100" {% if request.GET.price == '0-100' %}selected{% endif %}>Under $100</option>
+                <option value="100-200" {% if request.GET.price == '100-200' %}selected{% endif %}>$100 - $200</option>
+                <option value="200-500" {% if request.GET.price == '200-500' %}selected{% endif %}>$200 - $500</option>
+                <option value="500+" {% if request.GET.price == '500+' %}selected{% endif %}>$500+</option>
+            </select>
+        </div>
+        
+        <div>
+            <label for="bedrooms" class="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+            <select name="bedrooms" id="bedrooms" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                <option value="">Any</option>
+                {% for i in "12345"|make_list %}
+                    <option value="{{ i }}" {% if request.GET.bedrooms == i %}selected{% endif %}>
+                        {{ i }}+ Bedrooms
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div>
+            <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+            <select name="sort" id="sort" class="w-full rounded-md border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                <option value="recommended" {% if request.GET.sort == 'recommended' %}selected{% endif %}>Recommended</option>
+                <option value="price_low" {% if request.GET.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_high" {% if request.GET.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                <option value="rating" {% if request.GET.sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<!-- Property Grid -->
+<div id="property-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for property in properties %}
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div class="relative">
+                <img src="{{ property.images.first.image_url|default:'https://via.placeholder.com/300x200' }}" alt="{{ property.title }}" class="w-full h-56 object-cover">
+                <div class="absolute top-4 right-4 bg-white py-1 px-3 rounded-full text-sm font-medium text-primary">
+                    {{ property.get_property_type_display }}
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="flex items-center text-amber-500 mb-2">
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= property.rating %}
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                        {% else %}
+                            <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                <h3 class="text-xl font-semibold mb-2">{{ property.title }}</h3>
+                
+                <div class="flex items-center text-gray-600 mb-4">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    {{ property.location.city }}, {{ property.location.state }}
+                </div>
+                
+                <div class="flex items-center space-x-4 text-gray-600 mb-4">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        {{ property.bedrooms }} Beds
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        {{ property.bathrooms }} Baths
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Price per night</p>
+                        <p class="text-primary font-bold text-xl">${{ property.rent_amount }}</p>
+                    </div>
+                    <a href="{% url 'property_detail' property.pk %}" class="inline-block bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-span-full text-center py-12">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">No properties found</h3>
+            <p class="text-gray-500">Try adjusting your filters or check back later for new listings.</p>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+    <div class="mt-8 flex justify-center">
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <span class="sr-only">Previous</span>
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            {% endif %}
+            
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-primary text-sm font-medium text-white">
+                        {{ i }}
+                    </span>
+                {% else %}
+                    <a href="?page={{ i }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        {{ i }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <span class="sr-only">Next</span>
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+{% endif %}
+{% endblock %} 

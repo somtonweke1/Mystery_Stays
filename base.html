@@ -40,7 +40,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="{{ url_for('index') }}" class="flex items-center gap-2 text-primary text-xl font-bold">
+                    <a href="{% url 'index' %}" class="flex items-center gap-2 text-primary text-xl font-bold">
                         <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
                             <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 18.5l-8-4V9.5l8 4 8-4v7l-8 4zM12 13L4 9l8-4 8 4-8 4z"/>
                         </svg>
@@ -49,18 +49,18 @@
                 </div>
                 
                 <div class="hidden md:flex md:items-center md:space-x-8">
-                    <a href="{{ url_for('index') }}" class="text-gray-700 hover:text-primary font-medium">Home</a>
-                    <a href="{{ url_for('accommodations') }}" class="text-gray-700 hover:text-primary font-medium">Destinations</a>
-                    <a href="{{ url_for('how_it_works') }}" class="text-gray-700 hover:text-primary font-medium">How It Works</a>
-                    <a href="{{ url_for('testimonials') }}" class="text-gray-700 hover:text-primary font-medium">Testimonials</a>
-                    <a href="{{ url_for('contact') }}" class="text-gray-700 hover:text-primary font-medium">Contact</a>
+                    <a href="{% url 'index' %}" class="text-gray-700 hover:text-primary font-medium">Home</a>
+                    <a href="{% url 'property_list' %}" class="text-gray-700 hover:text-primary font-medium">Destinations</a>
+                    <a href="{% url 'how_it_works' %}" class="text-gray-700 hover:text-primary font-medium">How It Works</a>
+                    <a href="{% url 'testimonials' %}" class="text-gray-700 hover:text-primary font-medium">Testimonials</a>
+                    <a href="{% url 'contact' %}" class="text-gray-700 hover:text-primary font-medium">Contact</a>
                 </div>
                 
                 <div class="flex items-center space-x-4">
-                    {% if current_user.is_authenticated %}
+                    {% if user.is_authenticated %}
                         <div x-data="{ open: false }" class="relative">
                             <button @click="open = !open" class="flex items-center text-sm font-medium text-gray-700 hover:text-primary">
-                                Welcome, {{ current_user.username }}
+                                Welcome, {{ user.username }}
                                 <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                 </svg>
@@ -69,16 +69,16 @@
                                  @click.away="open = false"
                                  x-cloak
                                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                                <a href="{{ url_for('profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="{{ url_for('bookings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Bookings</a>
-                                <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Log Out</a>
+                                <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="{% url 'my_bookings' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Bookings</a>
+                                <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Log Out</a>
                             </div>
                         </div>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="px-4 py-2 border border-primary text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
+                        <a href="{% url 'login' %}" class="px-4 py-2 border border-primary text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
                             Log In
                         </a>
-                        <a href="{{ url_for('register') }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors">
+                        <a href="{% url 'register' %}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors">
                             Sign Up
                         </a>
                     {% endif %}
@@ -98,57 +98,55 @@
         <!-- Mobile menu -->
         <div class="md:hidden" x-data x-show="$store.mobileMenu.open" x-cloak>
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Home</a>
-                <a href="{{ url_for('accommodations') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Destinations</a>
-                <a href="{{ url_for('how_it_works') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">How It Works</a>
-                <a href="{{ url_for('testimonials') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Testimonials</a>
-                <a href="{{ url_for('contact') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Contact</a>
+                <a href="{% url 'index' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Home</a>
+                <a href="{% url 'property_list' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Destinations</a>
+                <a href="{% url 'how_it_works' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">How It Works</a>
+                <a href="{% url 'testimonials' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Testimonials</a>
+                <a href="{% url 'contact' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Contact</a>
             </div>
         </div>
     </nav>
 
     <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-                {% for category, message in messages %}
-                    <div 
-                        class="p-4 mb-4 rounded-md {% if category == 'error' %}bg-red-50 text-red-800{% elif category == 'success' %}bg-green-50 text-green-800{% else %}bg-blue-50 text-blue-800{% endif %}"
-                        x-data="{ show: true }"
-                        x-show="show"
-                        x-init="setTimeout(() => show = false, 5000)">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                {% if category == 'error' %}
-                                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                    </svg>
-                                {% elif category == 'success' %}
-                                    <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                    </svg>
-                                {% else %}
-                                    <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                    </svg>
-                                {% endif %}
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm">{{ message }}</p>
-                            </div>
-                            <div class="ml-auto pl-3">
-                                <button @click="show = false" class="inline-flex text-gray-400 hover:text-gray-500">
-                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                            </div>
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            {% for message in messages %}
+                <div 
+                    class="p-4 mb-4 rounded-md {% if message.tags == 'error' %}bg-red-50 text-red-800{% elif message.tags == 'success' %}bg-green-50 text-green-800{% else %}bg-blue-50 text-blue-800{% endif %}"
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-init="setTimeout(() => show = false, 5000)">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            {% if message.tags == 'error' %}
+                                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            {% elif message.tags == 'success' %}
+                                <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                            {% else %}
+                                <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                            {% endif %}
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm">{{ message }}</p>
+                        </div>
+                        <div class="ml-auto pl-3">
+                            <button @click="show = false" class="inline-flex text-gray-400 hover:text-gray-500">
+                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
     <!-- Main Content -->
     <main class="flex-grow">
@@ -191,39 +189,39 @@
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Company</h3>
                     <ul class="space-y-2">
-                        <li><a href="{{ url_for('about') }}" class="text-gray-300 hover:text-white transition-colors">About Us</a></li>
-                        <li><a href="{{ url_for('how_it_works') }}" class="text-gray-300 hover:text-white transition-colors">How It Works</a></li>
-                        <li><a href="{{ url_for('careers') }}" class="text-gray-300 hover:text-white transition-colors">Careers</a></li>
-                        <li><a href="{{ url_for('press') }}" class="text-gray-300 hover:text-white transition-colors">Press</a></li>
-                        <li><a href="{{ url_for('blog') }}" class="text-gray-300 hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="{% url 'about' %}" class="text-gray-300 hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="{% url 'how_it_works' %}" class="text-gray-300 hover:text-white transition-colors">How It Works</a></li>
+                        <li><a href="{% url 'careers' %}" class="text-gray-300 hover:text-white transition-colors">Careers</a></li>
+                        <li><a href="{% url 'press' %}" class="text-gray-300 hover:text-white transition-colors">Press</a></li>
+                        <li><a href="{% url 'blog' %}" class="text-gray-300 hover:text-white transition-colors">Blog</a></li>
                     </ul>
                 </div>
                 
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Support</h3>
                     <ul class="space-y-2">
-                        <li><a href="{{ url_for('faq') }}" class="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
-                        <li><a href="{{ url_for('contact') }}" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
-                        <li><a href="{{ url_for('privacy') }}" class="text-gray-300 hover:text-white transition-colors">Privacy Policy</a></li>
-                        <li><a href="{{ url_for('terms') }}" class="text-gray-300 hover:text-white transition-colors">Terms of Service</a></li>
-                        <li><a href="{{ url_for('safety') }}" class="text-gray-300 hover:text-white transition-colors">Trust & Safety</a></li>
+                        <li><a href="{% url 'faq' %}" class="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                        <li><a href="{% url 'contact' %}" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="{% url 'privacy' %}" class="text-gray-300 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="{% url 'terms' %}" class="text-gray-300 hover:text-white transition-colors">Terms of Service</a></li>
+                        <li><a href="{% url 'safety' %}" class="text-gray-300 hover:text-white transition-colors">Trust & Safety</a></li>
                     </ul>
                 </div>
                 
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Destinations</h3>
                     <ul class="space-y-2">
-                        <li><a href="{{ url_for('accommodations', category='beach') }}" class="text-gray-300 hover:text-white transition-colors">Beach Escapes</a></li>
-                        <li><a href="{{ url_for('accommodations', category='city') }}" class="text-gray-300 hover:text-white transition-colors">Urban Adventures</a></li>
-                        <li><a href="{{ url_for('accommodations', category='mountain') }}" class="text-gray-300 hover:text-white transition-colors">Mountain Retreats</a></li>
-                        <li><a href="{{ url_for('accommodations', category='countryside') }}" class="text-gray-300 hover:text-white transition-colors">Countryside Getaways</a></li>
-                        <li><a href="{{ url_for('accommodations', category='international') }}" class="text-gray-300 hover:text-white transition-colors">International Mysteries</a></li>
+                        <li><a href="{% url 'property_list' %}?category=beach" class="text-gray-300 hover:text-white transition-colors">Beach Escapes</a></li>
+                        <li><a href="{% url 'property_list' %}?category=city" class="text-gray-300 hover:text-white transition-colors">Urban Adventures</a></li>
+                        <li><a href="{% url 'property_list' %}?category=mountain" class="text-gray-300 hover:text-white transition-colors">Mountain Retreats</a></li>
+                        <li><a href="{% url 'property_list' %}?category=countryside" class="text-gray-300 hover:text-white transition-colors">Countryside Getaways</a></li>
+                        <li><a href="{% url 'property_list' %}?category=international" class="text-gray-300 hover:text-white transition-colors">International Mysteries</a></li>
                     </ul>
                 </div>
             </div>
             
             <div class="mt-12 pt-6 border-t border-gray-700 text-center text-gray-400 text-sm">
-                &copy; {{ current_year }} Mystery Stays. All rights reserved.
+                &copy; {% now "Y" %} Mystery Stays. All rights reserved.
             </div>
         </div>
     </footer>

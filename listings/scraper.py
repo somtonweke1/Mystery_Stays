@@ -9,7 +9,8 @@ from listings.models import Property, Location, Landlord
 import time
 import logging
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 # Configure logging
 logging.basicConfig(
@@ -22,163 +23,172 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def scrape_location_new_york(driver, max_pages):
-    listings = []
-    logger.info(f"Starting scrape for New York, max pages: {max_pages}")
-    # Create or get Location for New York
-    location, _ = Location.objects.get_or_create(
-        city="New York",
-        state="NY",
-        country="USA",
-        defaults={'zip_code': '10001'}  # Example zip code
-    )
-    for page in range(1, max_pages + 1):
-        url = f"https://www.airbnb.com/s/New-York--NY/homes?tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&flexible_trip_lengths%5B%5D=one_week&price_filter_input_type=0&price_filter_num_nights=5&date_picker_type=calendar&checkin=2025-05-01&checkout=2025-05-06&source=structured_search_input_header&search_type=autocomplete_click&query=New%20York%2C%20NY&place_id=ChIJOwg_06VPwokRYv534QaPC8g&page={page}"
-        driver.get(url)
-        try:
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, 'div[itemprop="itemListElement"]'))
-            )
-            elements = driver.find_elements(By.CSS_SELECTOR, 'div[itemprop="itemListElement"]')
-            logger.info(f"Found {len(elements)} listings on page {page}")
-            for element in elements:
-                try:
-                    listing_id = element.find_element(By.CSS_SELECTOR, 'a').get_attribute('href').split('/')[-1]
-                    title = element.find_element(By.CSS_SELECTOR, 'div[data-testid="listing-card-title"]').text
-                    price = element.find_element(By.CSS_SELECTOR, 'span._tyxjp1').text
-                    rating = element.find_element(By.CSS_SELECTOR, 'span.r4a59j5').text
-                    # Extract host name (example selector, adjust as needed)
-                    try:
-                        host_name = element.find_element(By.CSS_SELECTOR, 'div[data-testid="host-name"]').text
-                    except:
-                        host_name = None
-                    if not all([listing_id, title, price, rating]):
-                        logger.warning(f"Skipping listing due to missing data: {title}")
-                        continue
-                    price_cleaned = float(price.replace('$', '').split('/')[0])
-                    rating_cleaned = float(rating.split()[0])
-                    listings.append({
-                        'listing_id': listing_id,
-                        'title': title,
-                        'rent_amount': price_cleaned,
-                        'rating': rating_cleaned,
-                        'host_name': host_name
-                    })
-                except Exception as e:
-                    logger.error(f"Error parsing element on page {page}: {e}")
-                    continue
-            time.sleep(2)
-        except Exception as e:
-            logger.error(f"Error loading page {page}: {e}")
-            continue
-    for listing in listings:
-        try:
-            # Create or get Landlord if host_name is available
-            landlord = None
-            if listing['host_name']:
-                landlord, _ = Landlord.objects.get_or_create(name=listing['host_name'])
-            Property.objects.update_or_create(
-                listing_id=listing['listing_id'],  # Use listing_id as the unique identifier
-                defaults={
-                    'title': listing['title'],
-                    'rent_amount': listing['rent_amount'],
-                    'rating': listing['rating'],
-                    'location': location,
-                    'landlord': landlord,
-                    'source': 'AIRBNB'
-                }
-            )
-        except Exception as e:
-            logger.error(f"Error saving property {listing['title']}: {e}")
-    logger.info(f"Finished scraping New York. Saved {len(listings)} properties.")
-
-def scrape_location_chicago(driver, max_pages):
-    listings = []
-    logger.info(f"Starting scrape for Chicago, max pages: {max_pages}")
-    # Create or get Location for Chicago
-    location, _ = Location.objects.get_or_create(
-        city="Chicago",
-        state="IL",
-        country="USA",
-        defaults={'zip_code': '60601'}  # Example zip code
-    )
-    for page in range(1, max_pages + 1):
-        url = f"https://www.airbnb.com/s/Chicago--IL/homes?tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&flexible_trip_lengths%5B%5D=one_week&price_filter_input_type=0&price_filter_num_nights=5&date_picker_type=calendar&checkin=2025-05-01&checkout=2025-05-06&source=structured_search_input_header&search_type=autocomplete_click&query=Chicago%2C%20IL&place_id=ChIJ7cu8K2w0DogRAMY2XzZ5z-Y&page={page}"
-        driver.get(url)
-        try:
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, 'div[itemprop="itemListElement"]'))
-            )
-            elements = driver.find_elements(By.CSS_SELECTOR, 'div[itemprop="itemListElement"]')
-            logger.info(f"Found {len(elements)} listings on page {page}")
-            for element in elements:
-                try:
-                    listing_id = element.find_element(By.CSS_SELECTOR, 'a').get_attribute('href').split('/')[-1]
-                    title = element.find_element(By.CSS_SELECTOR, 'div[data-testid="listing-card-title"]').text
-                    price = element.find_element(By.CSS_SELECTOR, 'span._tyxjp1').text
-                    rating = element.find_element(By.CSS_SELECTOR, 'span.r4a59j5').text
-                    try:
-                        host_name = element.find_element(By.CSS_SELECTOR, 'div[data-testid="host-name"]').text
-                    except:
-                        host_name = None
-                    if not all([listing_id, title, price, rating]):
-                        logger.warning(f"Skipping listing due to missing data: {title}")
-                        continue
-                    price_cleaned = float(price.replace('$', '').split('/')[0])
-                    rating_cleaned = float(rating.split()[0])
-                    listings.append({
-                        'listing_id': listing_id,
-                        'title': title,
-                        'rent_amount': price_cleaned,
-                        'rating': rating_cleaned,
-                        'host_name': host_name
-                    })
-                except Exception as e:
-                    logger.error(f"Error parsing element on page {page}: {e}")
-                    continue
-            time.sleep(2)
-        except Exception as e:
-            logger.error(f"Error loading page {page}: {e}")
-            continue
-    for listing in listings:
-        try:
-            landlord = None
-            if listing['host_name']:
-                landlord, _ = Landlord.objects.get_or_create(name=listing['host_name'])
-            Property.objects.update_or_create(
-                listing_id=listing['listing_id'],  # Use listing_id as the unique identifier
-                defaults={
-                    'title': listing['title'],
-                    'rent_amount': listing['rent_amount'],
-                    'rating': listing['rating'],
-                    'location': location,
-                    'landlord': landlord,
-                    'source': 'AIRBNB'
-                }
-            )
-        except Exception as e:
-            logger.error(f"Error saving property {listing['title']}: {e}")
-    logger.info(f"Finished scraping Chicago. Saved {len(listings)} properties.")
-
-def run_all_scrapers(locations, max_pages):
-    options = Options()
+def setup_driver():
+    """Set up and return a configured Chrome WebDriver"""
+    options = webdriver.ChromeOptions()
     options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    service = Service(ChromeDriverManager().install())
+    return webdriver.Chrome(service=service, options=options)
+
+def get_or_create_location(city, state):
+    """Helper function to get or create a Location object"""
+    location, created = Location.objects.get_or_create(
+        city=city,
+        state=state,
+        defaults={
+            'country': 'United States',
+            'zip_code': ''  # We don't have this info from Airbnb listings
+        }
+    )
+    return location
+
+def scrape_location_new_york():
+    driver = setup_driver()
     try:
-        for location in locations:
-            if location.lower() == "new york":
-                scrape_location_new_york(driver, max_pages)
-            elif location.lower() == "chicago":
-                scrape_location_chicago(driver, max_pages)
+        url = "https://www.airbnb.com/s/New-York--NY--United-States/homes"
+        driver.get(url)
+        time.sleep(5)  # Wait for page to load
+        
+        # Wait for listings to load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-testid='card-container']"))
+        )
+        
+        listings = driver.find_elements(By.CSS_SELECTOR, "div[data-testid='card-container']")
+        logger.info(f"Found {len(listings)} listings on page")
+        
+        # Get or create New York location
+        ny_location = get_or_create_location('New York', 'NY')
+        
+        for listing in listings:
+            try:
+                # Get title
+                title = listing.find_element(By.CSS_SELECTOR, "div[data-testid='listing-card-title']").text
+                
+                # Get price - try different selectors
+                try:
+                    price = listing.find_element(By.CSS_SELECTOR, "span[data-testid='listing-card-price']").text
+                except NoSuchElementException:
+                    try:
+                        price = listing.find_element(By.CSS_SELECTOR, "span._1y74zjx").text
+                    except NoSuchElementException:
+                        price = "Price not available"
+                
+                # Get rating
+                try:
+                    rating = listing.find_element(By.CSS_SELECTOR, "span[data-testid='listing-card-rating']").text
+                except NoSuchElementException:
+                    rating = None
+                
+                # Create or update property
+                property_data = {
+                    'title': title,
+                    'location': ny_location,
+                    'rent_amount': float(price.replace('$', '').replace(',', '').split('/')[0]) if price != "Price not available" else 0,
+                    'rating': float(rating.split()[0]) if rating else None,
+                    'source': 'AIRBNB',
+                    'is_available': True,
+                    'updated_at': timezone.now()
+                }
+                
+                Property.objects.update_or_create(
+                    title=title,
+                    source='AIRBNB',
+                    defaults=property_data
+                )
+                
+            except Exception as e:
+                logger.error(f"Error parsing listing: {str(e)}")
+                continue
+                
+    except Exception as e:
+        logger.error(f"Error scraping New York: {str(e)}")
+    finally:
+        driver.quit()
+
+def scrape_location_chicago():
+    driver = setup_driver()
+    try:
+        url = "https://www.airbnb.com/s/Chicago--IL--United-States/homes"
+        driver.get(url)
+        time.sleep(5)  # Wait for page to load
+        
+        # Wait for listings to load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-testid='card-container']"))
+        )
+        
+        listings = driver.find_elements(By.CSS_SELECTOR, "div[data-testid='card-container']")
+        logger.info(f"Found {len(listings)} listings on page")
+        
+        # Get or create Chicago location
+        chicago_location = get_or_create_location('Chicago', 'IL')
+        
+        for listing in listings:
+            try:
+                # Get title
+                title = listing.find_element(By.CSS_SELECTOR, "div[data-testid='listing-card-title']").text
+                
+                # Get price - try different selectors
+                try:
+                    price = listing.find_element(By.CSS_SELECTOR, "span[data-testid='listing-card-price']").text
+                except NoSuchElementException:
+                    try:
+                        price = listing.find_element(By.CSS_SELECTOR, "span._1y74zjx").text
+                    except NoSuchElementException:
+                        price = "Price not available"
+                
+                # Get rating
+                try:
+                    rating = listing.find_element(By.CSS_SELECTOR, "span[data-testid='listing-card-rating']").text
+                except NoSuchElementException:
+                    rating = None
+                
+                # Create or update property
+                property_data = {
+                    'title': title,
+                    'location': chicago_location,
+                    'rent_amount': float(price.replace('$', '').replace(',', '').split('/')[0]) if price != "Price not available" else 0,
+                    'rating': float(rating.split()[0]) if rating else None,
+                    'source': 'AIRBNB',
+                    'is_available': True,
+                    'updated_at': timezone.now()
+                }
+                
+                Property.objects.update_or_create(
+                    title=title,
+                    source='AIRBNB',
+                    defaults=property_data
+                )
+                
+            except Exception as e:
+                logger.error(f"Error parsing listing: {str(e)}")
+                continue
+                
+    except Exception as e:
+        logger.error(f"Error scraping Chicago: {str(e)}")
     finally:
         driver.quit()
 
 def mark_outdated_listings():
-    threshold = timezone.now() - timedelta(days=7)
-    outdated_properties = Property.objects.filter(updated_at__lt=threshold)
-    for prop in outdated_properties:
-        prop.is_outdated = True
-        prop.save()
-    logger.info(f"Marked {outdated_properties.count()} properties as outdated.")
+    # Mark listings as outdated if they haven't been updated in the last 7 days
+    outdated_date = timezone.now() - timedelta(days=7)
+    Property.objects.filter(
+        updated_at__lt=outdated_date,
+        is_available=True
+    ).update(is_available=False)
+
+def run_scrapers():
+    total_properties = 0
+    try:
+        scrape_location_new_york()
+        scrape_location_chicago()
+        mark_outdated_listings()
+        total_properties = Property.objects.filter(source='AIRBNB', is_available=True).count()
+        logger.info(f"Successfully ran all scrapers. Total properties: {total_properties}")
+        return total_properties
+    except Exception as e:
+        logger.error(f"Error running scrapers: {str(e)}")
+        raise

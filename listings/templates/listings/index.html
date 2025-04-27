@@ -1,0 +1,97 @@
+{% extends "listings/base.html" %}
+
+{% block page_content %}
+<!-- Hero Section -->
+<section class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="relative">
+        <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80" alt="Hero Image" class="w-full h-96 object-cover">
+        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="text-center text-white px-4">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Discover Your Next Mystery Stay</h1>
+                <p class="text-xl mb-8">Book unique accommodations and experience the thrill of the unknown</p>
+                <a href="{% url 'property_list' %}" class="inline-block bg-primary text-white px-8 py-3 rounded-md hover:bg-primary-dark transition-colors">
+                    Browse Properties
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Properties -->
+<section class="mt-12">
+    <h2 class="text-2xl font-bold mb-6">Featured Properties</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for property in featured_properties %}
+            <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <img src="{{ property.images.first.image_url|default:'https://via.placeholder.com/300x200' }}" alt="{{ property.title }}" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <div class="flex items-center text-amber-500 mb-2">
+                        {% with ''|center:5 as range %}
+                            {% for _ in range %}
+                                {% if forloop.counter <= property.rating %}
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                {% else %}
+                                    <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                {% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">{{ property.title }}</h3>
+                    <p class="text-gray-600 mb-4">{{ property.description|truncatechars:100 }}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-primary font-bold">${{ property.rent_amount }}/night</span>
+                        <a href="{% url 'property_detail' property.pk %}" class="text-primary hover:text-primary-dark">View Details</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="mt-16">
+    <h2 class="text-2xl font-bold mb-8 text-center">How Mystery Stays Works</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+            <div class="w-16 h-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">Browse & Book</h3>
+            <p class="text-gray-600">Choose from our curated selection of mystery properties based on your preferences.</p>
+        </div>
+        <div class="text-center">
+            <div class="w-16 h-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">Wait for the Reveal</h3>
+            <p class="text-gray-600">After booking, wait for the exciting moment when your mystery location is revealed.</p>
+        </div>
+        <div class="text-center">
+            <div class="w-16 h-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">Enjoy Your Stay</h3>
+            <p class="text-gray-600">Experience a unique and memorable stay at your mystery destination.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="mt-16 bg-primary rounded-xl text-white p-12 text-center">
+    <h2 class="text-3xl font-bold mb-4">Ready for Your Mystery Adventure?</h2>
+    <p class="text-xl mb-8">Join thousands of travelers who've discovered unexpected destinations.</p>
+    <a href="{% url 'property_list' %}" class="inline-block bg-white text-primary px-8 py-3 rounded-md hover:bg-gray-100 transition-colors">
+        Start Exploring
+    </a>
+</section>
+{% endblock %} 
