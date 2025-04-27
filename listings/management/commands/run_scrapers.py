@@ -1,58 +1,29 @@
-import logging
+# listings/management/commands/run_scrapers.py
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from listings.scrapers import run_all_scrapers, mark_outdated_listings
 
-logger = logging.getLogger(__name__)
-
 class Command(BaseCommand):
-    help = 'Run property listing scrapers to fetch voucher-friendly properties'
-    
+    help = 'Run property scrapers for the specified locations'
+
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--locations',
-            nargs='+',
-            type=str,
-            help='List of locations to search (cities or ZIP codes)'
-        )
-        
-        parser.add_argument(
-            '--max-pages',
-            type=int,
-            default=2,
-            help='Maximum number of pages to scrape per location and source'
-        )
-        
-        parser.add_argument(
-            '--mark-outdated',
-            action='store_true',
-            help='Mark properties as unavailable if they have not been updated recently'
-        )
-        
-        parser.add_argument(
-            '--outdated-days',
-            type=int,
-            default=30,
-            help='Number of days after which a property is considered outdated'
-        )
-    
+        parser.add_argument('--locations', nargs='+', type=str, help='Locations to scrape')
+        parser.add_argument('--max-pages', type=int, default=3, help='Maximum number of pages to scrape per location')
+        parser.add_argument('--mark-outdated', action='store_true', help='Mark outdated listings before scraping')
+
     def handle(self, *args, **options):
-        locations = options.get('locations')
-        max_pages = options.get('max_pages')
+        locations = options['locations']
+        max_pages = options['max_pages']
         
-        if not locations:
-            self.stdout.write('No locations specified, using defaults')
+        self.stdout.write(f"Starting scrapers for locations: {', '.join(locations)}")
+        self.stdout.write(f"Max pages per location: {max_pages}")
         
-        # Run the scrapers
-        self.stdout.write(f'Running scrapers for {len(locations) if locations else "default"} locations...')
-        results = run_all_scrapers(locations=locations, max_pages=max_pages)
+        if options['mark_outdated']:
+            self.stdout.write("Marking outdated listings...")
+            mark_outdated_listings()
         
-        # Report results
-        self.stdout.write(self.style.SUCCESS(f'Scraping completed. Found {results["total"]} voucher-friendly properties:'))
-        self.stdout.write(f'  - Zillow: {results["zillow"]}')
-        self.stdout.write(f'  - Apartments.com: {results["apartments"]}')
+        start_time = timezone.now()
+        run_all_scrapers(locations, max_pages)
+        end_time = timezone.now()
         
-        # Mark outdated listings if requested
-        if options.get('mark_outdated'):
-            days = options.get('outdated_days')
-            count = mark_outdated_listings(days=days)
-            self.stdout.write(self.style.SUCCESS(f'Marked {count} properties as unavailable (not updated in {days} days)'))
+        self.stdout.write(self.style.SUCCESS(f"Scraping completed in {(end_time - start_time).total_seconds()} seconds"))

@@ -1,152 +1,88 @@
 from django.db import models
-from django.utils import timezone
-
 
 class Landlord(models.Model):
-    """Model representing property landlords/owners/companies"""
-    name = models.CharField(max_length=255)
-    website = models.URLField(blank=True, null=True)
+    name = models.CharField(max_length=100)
     email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(max_length=50, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    logo_url = models.URLField(blank=True, null=True)
-    voucher_friendly = models.BooleanField(default=True)
-    
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    voucher_friendly = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.name
-    
-    class Meta:
-        ordering = ['name']
-
 
 class Location(models.Model):
-    """Model representing property locations"""
+    address = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
-    country = models.CharField(max_length=100, default='United States')
+    country = models.CharField(max_length=100)
     zip_code = models.CharField(max_length=20, blank=True, null=True)
-    address = models.CharField(max_length=255, blank=True, null=True)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.city}, {self.state}"
-    
-    class Meta:
-        ordering = ['city', 'state']
-
+        return f"{self.city}, {self.state}, {self.country}"
 
 class VoucherType(models.Model):
-    """Model representing different types of housing vouchers accepted"""
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True, null=True)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.name
-
-
-class Property(models.Model):
-    """Model representing property listings"""
-    PROPERTY_TYPES = [
-        ('apartment', 'Apartment'),
-        ('house', 'House'),
-        ('condo', 'Condominium'),
-        ('townhouse', 'Townhouse'),
-        ('duplex', 'Duplex'),
-        ('studio', 'Studio'),
-        ('other', 'Other'),
-    ]
-    
-    SOURCE_CHOICES = [
-        ('zillow', 'Zillow'),
-        ('apartments', 'Apartments.com'),
-        ('realtor', 'Realtor.com'),
-        ('craigslist', 'Craigslist'),
-        ('housing_authority', 'Housing Authority'),
-        ('manual', 'Manually Added'),
-        ('other', 'Other Source'),
-    ]
-    
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
-    property_type = models.CharField(max_length=20, choices=PROPERTY_TYPES, default='apartment')
-    bedrooms = models.IntegerField(default=1)
-    bathrooms = models.DecimalField(max_digits=3, decimal_places=1, default=1.0)
-    square_feet = models.IntegerField(blank=True, null=True)
-    
-    rent_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    
-    landlord = models.ForeignKey(Landlord, on_delete=models.CASCADE, related_name='properties')
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='properties')
-    voucher_types = models.ManyToManyField(VoucherType, related_name='properties')
-    
-    is_available = models.BooleanField(default=True)
-    is_featured = models.BooleanField(default=False)
-    date_posted = models.DateTimeField(default=timezone.now)
-    date_available = models.DateField(blank=True, null=True)
-    
-    # Listing source tracking
-    source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default='manual')
-    external_id = models.CharField(max_length=100, blank=True, null=True)
-    external_url = models.URLField(blank=True, null=True)
-    last_scraped = models.DateTimeField(blank=True, null=True)
-    
-    # Images
-    main_image_url = models.URLField(blank=True, null=True)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return f"{self.title} - {self.location.city}, {self.location.state}"
-    
-    class Meta:
-        verbose_name_plural = "Properties"
-        ordering = ['-date_posted']
-
-
-class PropertyImage(models.Model):
-    """Model for property images"""
-    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images')
-    image_url = models.URLField()
-    caption = models.CharField(max_length=255, blank=True, null=True)
-    order = models.IntegerField(default=0)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"Image for {self.property}"
-    
-    class Meta:
-        ordering = ['order']
-
 
 class Amenity(models.Model):
-    """Model for property amenities"""
     name = models.CharField(max_length=100)
     
     def __str__(self):
         return self.name
-    
-    class Meta:
-        verbose_name_plural = "Amenities"
 
-
-class PropertyAmenity(models.Model):
-    """Junction model for property amenities"""
-    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='property_amenities')
-    amenity = models.ForeignKey(Amenity, on_delete=models.CASCADE)
+class Property(models.Model):
+    PROPERTY_TYPE_CHOICES = (
+        ('APARTMENT', 'Apartment'),
+        ('HOUSE', 'House'),
+        ('CONDO', 'Condo'),
+        ('TOWNHOUSE', 'Townhouse'),
+    )
+    SOURCE_CHOICES = (
+        ('AIRBNB', 'Airbnb'),
+        ('OTHER', 'Other'),
+    )
+    listing_id = models.CharField(max_length=50, unique=True, blank=True, null=True)  # Added for scraper
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    landlord = models.ForeignKey(Landlord, on_delete=models.SET_NULL, null=True, blank=True)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    property_type = models.CharField(max_length=50, choices=PROPERTY_TYPE_CHOICES, default='APARTMENT')
+    bedrooms = models.PositiveIntegerField(default=1)
+    bathrooms = models.PositiveIntegerField(default=1)
+    rent_amount = models.FloatField()
+    rating = models.FloatField(blank=True, null=True)
+    is_available = models.BooleanField(default=True)
+    source = models.CharField(max_length=50, choices=SOURCE_CHOICES, default='AIRBNB')
+    voucher_types = models.ManyToManyField(VoucherType, blank=True)
+    date_posted = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_outdated = models.BooleanField(default=False)
     
     def __str__(self):
-        return f"{self.amenity.name} at {self.property}"
+        return f"{self.title} ({self.location.city}, {self.location.state})"
+
+class PropertyImage(models.Model):
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images')
+    image_url = models.URLField(max_length=500)
+    caption = models.CharField(max_length=255, blank=True, null=True)
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
-    class Meta:
-        verbose_name_plural = "Property Amenities"
+    def __str__(self):
+        return f"Image for {self.property.title} (Order: {self.order})"
+
+class PropertyAmenity(models.Model):
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='property_amenities')
+    amenity = models.ForeignKey(Amenity, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.amenity.name} for {self.property.title}"
