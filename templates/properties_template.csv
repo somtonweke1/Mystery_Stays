@@ -1,0 +1,4 @@
+title,description,property_type,bedrooms,bathrooms,rent_amount,is_available,rating,landlord_name,landlord_email,city,state,address,amenities,image_urls
+"Luxury Apartment in Manhattan","Beautiful luxury apartment with stunning views of Central Park",APARTMENT,2,2,500,true,5,"John Smith","john@example.com","New York","NY","123 Park Ave","WiFi,Air Conditioning,Parking,Gym,Pool","https://example.com/image1.jpg,https://example.com/image2.jpg"
+"Cozy Studio in Brooklyn","Charming studio apartment in a quiet neighborhood",STUDIO,1,1,200,true,4,"Jane Doe","jane@example.com","Brooklyn","NY","456 Main St","WiFi,Kitchen,Washer/Dryer","https://example.com/image3.jpg,https://example.com/image4.jpg"
+"Modern Loft in Chicago","Spacious loft with industrial design",LOFT,1,1,300,true,4,"Mike Johnson","mike@example.com","Chicago","IL","789 Loop Rd","WiFi,Air Conditioning,Elevator,Doorman","https://example.com/image5.jpg,https://example.com/image6.jpg" 
