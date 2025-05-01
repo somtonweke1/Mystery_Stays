@@ -21,19 +21,88 @@ from datetime import datetime
 
 # Frontend Views
 def index(request):
-    featured_properties = Property.objects.filter(is_available=True)[:4]
+    # Get featured properties with proper ordering and filtering
+    featured_properties = Property.objects.filter(
+        is_available=True
+    ).select_related(
+        'location'
+    ).prefetch_related(
+        'images'
+    ).order_by(
+        '-rating',  # Higher rated properties first
+        '-created_at'  # Then newer properties
+    ).distinct()[:4]  # Get only 4 properties
+    
     return render(request, 'listings/index.html', {
         'featured_properties': featured_properties
     })
 
 def property_list(request):
-    properties = Property.objects.filter(is_available=True)
-    category = request.GET.get('category')
-    if category:
-        properties = properties.filter(property_type=category)
+    properties = Property.objects.filter(
+        is_available=True
+    ).select_related(
+        'location'
+    ).prefetch_related(
+        'images',
+        'property_amenities__amenity'
+    )
+    
+    # Get all property types for the filter
+    property_types = Property.PROPERTY_TYPE_CHOICES
+    
+    # Filter by property type
+    property_type = request.GET.get('property_type')
+    if property_type:
+        properties = properties.filter(property_type=property_type)
+    
+    # Filter by location
+    location = request.GET.get('location')
+    if location:
+        properties = properties.filter(location__city__icontains=location)
+    
+    # Filter by price range
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    if min_price:
+        properties = properties.filter(rent_amount__gte=float(min_price))
+    if max_price:
+        properties = properties.filter(rent_amount__lte=float(max_price))
+    
+    # Filter by bedrooms
+    bedrooms = request.GET.get('bedrooms')
+    if bedrooms:
+        properties = properties.filter(bedrooms__gte=int(bedrooms))
+    
+    # Filter by amenities
+    amenities = request.GET.getlist('amenities')
+    if amenities:
+        properties = properties.filter(property_amenities__amenity__name__in=amenities)
+    
+    # Sort properties
+    sort_by = request.GET.get('sort_by', '-created_at')
+    if sort_by in ['rent_amount', '-rent_amount', 'rating', '-rating', 'created_at', '-created_at']:
+        properties = properties.order_by(sort_by)
+    
+    # Get all available amenities for the filter sidebar
+    all_amenities = Amenity.objects.all()
+    
+    # Get unique locations for the location filter
+    locations = Location.objects.filter(property__in=properties).distinct()
+    
     return render(request, 'listings/property_list.html', {
         'properties': properties,
-        'category': category
+        'property_types': property_types,
+        'all_amenities': all_amenities,
+        'locations': locations,
+        'filters': {
+            'property_type': property_type,
+            'location': location,
+            'min_price': min_price,
+            'max_price': max_price,
+            'bedrooms': bedrooms,
+            'amenities': amenities,
+            'sort_by': sort_by
+        }
     })
 
 def property_detail(request, pk):
